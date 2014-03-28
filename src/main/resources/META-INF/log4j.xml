@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration>
+	<appender name="stoud" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="%d{yyyy/mm/dd HH:mm:ss,SSS} [%t] %-5p %c %x - %m%n" />
+		</layout>
+	</appender>
+	<!-- <appender name="ASYNC" class="org.apache.log4j.AsyncAppender"> <param 
+		name="BufferSize" value="14000"/> <appender-ref ref="stoud"/> </appender> 
+		<root> <priority value="off"/> <appender-ref ref="ASYNC"/> </root> -->
+
+	<root>
+		<priority value="on" />
+		<appender-ref ref="ASYNC" />
+	</root>
+
+	<logger name="scala.slick.jdbc">
+		<level value="DEBUG" />
+		<appender-ref ref="stoud" />
+	</logger>
+
+
+</log4j:configuration>
