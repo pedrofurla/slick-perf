@@ -18,3 +18,9 @@ libraryDependencies ++= Seq(
 
 fork in run := true
 
+initialCommands in console :=
+  """
+    |import slickperf._
+    |import MySqlConnection._
+    |import MySqlConnection.simple._
+  """.stripMargin

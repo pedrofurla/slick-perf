@@ -1,20 +1,20 @@
 package slickperf
+
 // AUTO-GENERATED Slick data model
 /** Stand-alone Slick data model for immediate use */
-object Tables extends {
-  val profile = scala.slick.driver.MySQLDriver
-} with Tables
 
 /** Slick data model trait for extension, choice of backend or usage in the cake pattern. (Make sure to initialize this late.) */
-trait Tables {
-  val profile: scala.slick.driver.JdbcProfile
+trait Tables { self: DBConnection with SlickProfile =>
+
   import profile.simple._
   import scala.slick.model.ForeignKeyAction
   // NOTE: GetResult mappers for plain SQL are only generated for tables where Slick knows how to map the types of all columns.
   import scala.slick.jdbc.{GetResult => GR}
-  
+
+
+
   /** DDL for all tables. Call .create to execute. */
-  lazy val ddl = MainTcUser.ddl ++ PayTdAccount.ddl ++ PayTdiAccountItem.ddl
+  lazy val ddl:self.profile.DDL = MainTcUser.ddl ++ PayTdAccount.ddl ++ PayTdiAccountItem.ddl
   
   /** Entity class storing rows of table MainTcUser
    *  @param id Database column id PrimaryKey

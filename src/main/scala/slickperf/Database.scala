@@ -3,7 +3,6 @@ package slickperf
 import scala.slick.driver.JdbcProfile
 
 trait ConnectionTemplate {
-  val env:String
   val url:String
   val username:String
   val password:String
@@ -12,16 +11,15 @@ trait ConnectionTemplate {
 }
 
 trait MySqlConection extends ConnectionTemplate {
-  val env = scala.util.Properties.envOrElse("runMode", "prod")
   val url = "jdbc:mysql://localhost:3306/slickperf"
   val username = "root"
-  val password = "1root"
+  val password = ""
   val driver = "scala.slick.driver.MySQLDriver"
 }
 
 trait SlickProfile {
   val profile: JdbcProfile
-  val simple:profile.simple.type = profile.simple
+  lazy val simple:profile.simple.type = profile.simple
 }
 
 trait MySqlProfile extends SlickProfile with MySqlConection {
@@ -29,12 +27,14 @@ trait MySqlProfile extends SlickProfile with MySqlConection {
 }
 
 trait DBConnection {
-  this: ConnectionTemplate with SlickProfile =>
+  this: ConnectionTemplate with SlickProfile with Tables =>
 
-  import profile.simple._
+  import simple._
+  def connect: Database =  Database.forURL( url, username, password,null, driver)
 
-  def connect(): Database =  Database.forURL( url, username, password,null, driver)
-
+  import profile.Implicit._
+  def createSchema = connect withSession { s => ddl.create(s) }
+  def destroySchema = connect withSession { s => ddl.drop(s) }
 }
 
-object MySqlConnection extends DBConnection with MySqlProfile
+object MySqlConnection extends DBConnection with MySqlProfile with Tables

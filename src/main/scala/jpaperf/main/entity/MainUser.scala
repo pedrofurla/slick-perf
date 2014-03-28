@@ -13,7 +13,6 @@ import java.util.ArrayList
 @Entity()
 @Table(name = "MAIN_TC_USER")
 class MainUser {
-
   @BeanProperty
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +38,5 @@ class MainUser {
   @OneToMany(cascade = Array(CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE), fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   var payAccountList: List[PayAccount] = new ArrayList[PayAccount]
-
-
 }
         
