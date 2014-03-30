@@ -2,24 +2,18 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
              version="1.0" xmlns="http://java.sun.com/xml/ns/persistence">
 
-    <persistence-unit name="xpay-persistence">
+    <persistence-unit name="slickperf-persistence">
 
-        <class>jpaperf.main.entity.MainUser</class>
+        <class>jpaperf.MainUser</class>
+        <class>jpaperf.PayAccount</class>
+        <class>jpaperf.PayAccountItem</class>
 
-        <class>jpaperf.pay.entity.PayAccount</class>
-
-        <class>jpaperf.pay.entity.PayAccountItem</class>
-
-        <!--
-        <jta-data-source>java:/slickperf-ds</jta-data-source>
-      -->
         <properties>
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
             <property name="javax.persistence.jdbc.url"
-                      value="jdbc:mysql://localhost:3306/xpay"/>
+                      value="jdbc:mysql://localhost:3306/slickperf"/>
             <property name="javax.persistence.jdbc.user" value="root"/>
-            <property name="javax.persistence.jdbc.password" value="1root"/>
+            <!--<property name="javax.persistence.jdbc.password" value="1root"/>-->
         </properties>
     </persistence-unit>
 </persistence>
-        

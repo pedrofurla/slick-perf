@@ -14,7 +14,8 @@ libraryDependencies ++= Seq(
     "org.eclipse.persistence" % "eclipselink" % "2.5.0",
     "mysql" % "mysql-connector-java" % "5.1.25",
     "org.postgresql" % "postgresql" % "9.3-1100-jdbc41",
-    "org.slf4j" % "slf4j-nop" % "1.6.4")
+    "org.slf4j" % "slf4j-nop" % "1.6.4",
+    "org.scalaz" %% "scalaz-core" % "7.0.6")
 
 fork in run := true
 

@@ -1,12 +1,11 @@
 package client.test
 
 import javax.persistence.Persistence
-import jpaperf.main.entity.MainUser
-import jpaperf.pay.entity.PayAccount
 
 import TestHelper._
+import jpaperf.{MainUser, PayAccount}
 
-object Main{
+object JPAInsert {
 
   def main(args: Array[String]) {    
     for (i <- numberOfInserts) {
@@ -37,7 +36,7 @@ object Main{
       }
       em.getTransaction().commit();
     }
-    printTime(duration)
+    printTime(duration,number,MS)
   }
 
 }

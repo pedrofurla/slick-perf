@@ -17,9 +17,9 @@ object TestHelper {
   val MS = TimeUnit(1, "ms")
   val SEC = TimeUnit(1000, "sec")
 
-  def printTime(time: Long, timeUnit:TimeUnit = SEC) {
+  def printTime(time: Long, number:Int=1, timeUnit:TimeUnit = SEC) {
     val duration = time / timeUnit.divisor
-    println(s"query executed for $duration ${timeUnit.name}")
+    println(s"query executed $number times for $duration ${timeUnit.name}")
   }
 
   def chronometer(u: => Unit):Long = {

@@ -1,6 +1,6 @@
 package client.test
 
-import jpaperf.main.entity.MainUser
+import jpaperf.MainUser
 import javax.persistence.Persistence
 import TestHelper._
 

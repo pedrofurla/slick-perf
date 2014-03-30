@@ -1,12 +1,14 @@
 package slickperf
 
-import scala.slick.driver.MySQLDriver.simple._
 import client.test.TestHelper._
 
 object SlickQuery  {
 
+  import MySqlConnection._
+  import simple._
+
   def findUser(id: Column[Int]) = for {
-    account <- Tables.PayTdAccount
+    account <- PayTdAccount
     user <- account.mainTcUserFk if user.id === id
   } yield (user, account)
 
@@ -19,7 +21,7 @@ object SlickQuery  {
       }
     }
 
-    printTime(duration, SEC)
+    printTime(duration, 1, MS)
 
   }
 

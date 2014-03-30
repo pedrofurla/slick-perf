@@ -67,7 +67,7 @@ trait Tables { self: DBConnection with SlickProfile =>
     def ? = (id.?, amount, reserved, userId.?).shaped.<>({r=>import r._; _1.map(_=> PayTdAccountRow.tupled((_1.get, _2, _3, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
     
     /** Database column id PrimaryKey */
-    val id: Column[Int] = column[Int]("id", O.PrimaryKey)
+    val id: Column[Int] = column[Int]("id", O.PrimaryKey,O.AutoInc)
     /** Database column amount  */
     val amount: Column[Option[Double]] = column[Option[Double]]("amount")
     /** Database column reserved  */

@@ -10,7 +10,7 @@ trait ConnectionTemplate {
 
 }
 
-trait MySqlConection extends ConnectionTemplate {
+trait MySqlConnection extends ConnectionTemplate {
   val url = "jdbc:mysql://localhost:3306/slickperf"
   val username = "root"
   val password = ""
@@ -22,7 +22,7 @@ trait SlickProfile {
   lazy val simple:profile.simple.type = profile.simple
 }
 
-trait MySqlProfile extends SlickProfile with MySqlConection {
+trait MySqlProfile extends SlickProfile with MySqlConnection {
   val profile = scala.slick.driver.MySQLDriver
 }
 
@@ -32,7 +32,6 @@ trait DBConnection {
   import simple._
   def connect: Database =  Database.forURL( url, username, password,null, driver)
 
-  import profile.Implicit._
   def createSchema = connect withSession { s => ddl.create(s) }
   def destroySchema = connect withSession { s => ddl.drop(s) }
 }
