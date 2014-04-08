@@ -1,37 +1,29 @@
 package slickperf
 
-import client.test.TestHelper._
-
+import exec.TestHelper._
+import exec._
+import exec.Reports._
 import MySqlConnection._
-import profile._
 import MySqlConnection.simple._
 
 object SlickInsert {
 
-  def main(args: Array[String]) {
-    val newUsers = MainTcUser.map(s => s) returning MainTcUser.map(_.id)
-    newUsers.insertStatement
-
-    val accounts = PayTdAccount.map(s => s) returning PayTdAccount.map(_.id) // PayTdAccount.insertInvoker
-    accounts.insertStatement
-    
-    for (i <- numberOfInserts) {
-      add(newUsers, accounts, i)
-    }
+  def run: Report = {
+    printMe(Report("Inserting users and one account per user with one connection",
+      for (i <- numberOfInserts) yield {
+        printMe(reportLine(performWithTransactionN(i)(action(_))))
+        //println(performInTransactionN(i)(action(_)))
+      },
+      Chronograph.Micros))
   }
 
-  private def add(newUsers: KeysInsertInvoker[MainTcUserRow, Int],
-                  accounts: KeysInsertInvoker[PayTdAccountRow, Int], number: Int) {
-    val duration = chronometer {
-      connect.withTransaction { implicit session =>
-        for (i <- 1 to number) {
-          val user = MainTcUserRow(0, Some("test"), Some("test"), Some("test"), Some("test"))
-          val id = (newUsers) += user
-          val account = PayTdAccountRow(0, Some(500), Some(200), id)
-          accounts += account
-        }
-      }
-    }
-    printTime(duration,number, MS)
+  private final def action(implicit s:Session):Unit = {
+    val id = insertUser insert newUser
+     insertAccounts insert newPayAccount(id)
   }
+
+  private final def newUser = MainTcUserRow(0, Some("test"), Some("test"), Some("test"), Some("test"))
+  private final def newPayAccount(userId:Int) = PayTdAccountRow(0, Some(500), Some(200), userId)
+
+
 }

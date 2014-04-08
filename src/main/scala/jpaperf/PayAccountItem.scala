@@ -17,6 +17,7 @@ class PayAccountItem {
   @Id
   var id: Long = _
 
+
   @BeanProperty
   @Column
   var amount: String = _
@@ -28,6 +29,7 @@ class PayAccountItem {
   @BeanProperty
   @Column
   var inserted: Timestamp = _
+
 
   @BeanProperty
   @ManyToOne

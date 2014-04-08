@@ -11,8 +11,6 @@ trait Tables { self: DBConnection with SlickProfile =>
   // NOTE: GetResult mappers for plain SQL are only generated for tables where Slick knows how to map the types of all columns.
   import scala.slick.jdbc.{GetResult => GR}
 
-
-
   /** DDL for all tables. Call .create to execute. */
   lazy val ddl:self.profile.DDL = MainTcUser.ddl ++ PayTdAccount.ddl ++ PayTdiAccountItem.ddl
   
@@ -67,7 +65,7 @@ trait Tables { self: DBConnection with SlickProfile =>
     def ? = (id.?, amount, reserved, userId.?).shaped.<>({r=>import r._; _1.map(_=> PayTdAccountRow.tupled((_1.get, _2, _3, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
     
     /** Database column id PrimaryKey */
-    val id: Column[Int] = column[Int]("id", O.PrimaryKey,O.AutoInc)
+    val id: Column[Int] = column[Int]("id", O.PrimaryKey, O.AutoInc)
     /** Database column amount  */
     val amount: Column[Option[Double]] = column[Option[Double]]("amount")
     /** Database column reserved  */

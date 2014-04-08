@@ -1,33 +1,30 @@
 package slickperf
 
-import client.test.TestHelper._
+import exec.TestHelper._
+import exec._
+import exec.Reports._
+import MySqlConnection._
+import MySqlConnection.simple._
 
 object SlickQuery  {
 
-  import MySqlConnection._
-  import simple._
-
-  def findUser(id: Column[Int]) = for {
-    account <- PayTdAccount
-    user <- account.mainTcUserFk if user.id === id
-  } yield (user, account)
-
-  val findUserCompiled = Compiled(findUser _)
-
-  def test() = {
-    val duration = chronometer {
-      MySqlConnection.connect.withTransaction { implicit session =>
-        findUserCompiled(1).run
-      }
-    }
-
-    printTime(duration, 1, MS)
-
+  def run: Report = {
+    printMe(Report(
+      "Querying users and its accounts",
+      for (i <- numberOfInserts) yield {
+        val ids = scala.util.Random.shuffle(allIds).take(i).toList
+        printMe(reportLine(performWithTransactionN(i)(action(ids))))
+        //println(performInTransactionN(i)(action(_)))
+      },
+      Chronograph.Micros))
   }
 
-  def main(args: Array[String]) =
-    execute(10) {
-      test()
+  private final def action(is:List[Long])(s:Session):Unit = {
+    is map { i =>
+      findUserCompiled(i.toInt)
     }
+  }
+
+
 
 }
