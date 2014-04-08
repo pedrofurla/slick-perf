@@ -46,4 +46,16 @@ object JPA {
   def performNWithTransaction(n:Int)(action:EMAction[Unit]): ElapsedTimeOf[Int] =
     micros{ (n:Int) => repeatN(n) { withTransaction(action) }; n  }(n)
 
+  def performInTransaction[A,B](n:B)(action:EMAction[A]): ElapsedTimeOf[A] =
+    inJpa { em =>
+      micros[B,A] { n => inTransaction{em => action(em)}(em) }(n)
+    }
+
+  def performWithTransaction[A,B](n:B)(action:EMAction[A]): ElapsedTimeOf[A] =
+    micros[B,A] { n => withTransaction { em => action(em) } }(n)
+
+
+
+
+
 }

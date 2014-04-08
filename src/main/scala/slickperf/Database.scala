@@ -54,6 +54,17 @@ trait DBConnection {
        micros { const(n) compose { s => repeatN(n)(action(s)) } }
      }
 
+  def performWithTransaction[A,B](n:B)(action:SlickAction[A]): ElapsedTimeOf[A] =
+    withTransaction {
+      import DynSession._
+      micros[B,A]( n =>  action(dynSession) )(n)
+    }
+
+  def performInTransaction[A,B](n:B)(action:SlickAction[A]): ElapsedTimeOf[A] =
+     inTransaction { s =>
+       micros[B,A] { n => action(s) }(n)
+     }
+
 }
 
 trait MySqlConnection extends ConnectionTemplate {

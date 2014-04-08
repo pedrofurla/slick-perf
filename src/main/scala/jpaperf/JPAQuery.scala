@@ -11,17 +11,20 @@ object JPAQuery {
     printMe(Report(
       "Querying users and its accounts",
       for (i <- numberOfInserts) yield {
-        val ids = scala.util.Random.shuffle(allIds).take(i).toList
-        printMe(reportLine(performWithTransactionN(i)(action(ids))))
-        //println(performInTransactionN(i)(action(_)))
+        val ids = allIds.take(i).toList
+
+        printMe(reportLine(performInTransaction(i)(action(ids))))
+        // hurts the performance horribly
+        //printMe(reportLine(performWithTransaction(i)(action(ids))))
       },
       Chronograph.Micros))
   }
 
-  private final def action(ids:List[Long])(em:EntityManager):Unit = {
+  private final def action(ids:List[Long])(em:EntityManager):Int = {
+    val query = em.createQuery("from MainUser u where u.id = ?1")
     ids.map{ i =>
-      val users = em.createQuery("from MainUser u where u.id = ?1").setParameter(1, i).getResultList()
       import scala.collection.JavaConversions._
+      val users = query.setParameter(1, i).getResultList()
 
       val result = for {
         u <- users
@@ -31,6 +34,7 @@ object JPAQuery {
       // force loading
       for (i <- result) yield { 2*i._2.getAmount }
     }
+    ids.length
   }
 
 

@@ -21,8 +21,8 @@ object TestHelper {
     a
   }
 
-  val numberOfInserts = List(1, 10/*, 20, 30, 40, 50, 100, 200, 300, 400, 600, 800, 1000
-    , 5000, 10000, 1, 10, 20, 30, 40, 50, 100*/)
+  val numberOfInserts = List(1, 10, 20, 30, 40, 50, 100, 200, 300, 400, 600, 800, 1000
+    , 5000, 10000, 1, 10, 20, 30, 40, 50, 100)
   val totalInserts = numberOfInserts.sum
   val allIds:List[Long] = (1 to totalInserts) map { _.toLong} toList
 
