@@ -21,14 +21,19 @@ object TestHelper {
     a
   }
 
-  val numberOfInserts = List(1, 10, 20, 30, 40, 50, 100, 200, 300, 400, 600, 800, 1000
-    , 5000, 10000, 1, 10, 20, 30, 40, 50, 100)
+  val numberOfInserts = List(
+     1, 10, 20, 30, 40, 50
+    //,100, 200, 300, 400, 500
+    //,1000//, 2000, 3000, 4000, 5000
+    //,6000,7000,8000,9000,10000
+    //,10000, 20000, 30000, 40000, 50000
+  )
   val totalInserts = numberOfInserts.sum
   val allIds:List[Long] = (1 to totalInserts) map { _.toLong} toList
 
   def repeatN2[A](a: => A) = (n:Int) => for(i <- 1 to n) a;
   def repeatNm[A](n:Int)(a: => A) = for(i <- 1 to n) a;
-  def repeatN[A] = repeatNm[A] _
+  def repeatN[A] = repeatNm[A] _ // TODO rename to `repeat`
 
   def const[A,B] = (a:A) => (b:B) => a
 

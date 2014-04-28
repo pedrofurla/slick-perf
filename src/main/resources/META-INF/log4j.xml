@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <log4j:configuration>
-	<appender name="stoud" class="org.apache.log4j.ConsoleAppender">
+	<appender name="stout" class="org.apache.log4j.ConsoleAppender">
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern"
 				value="%d{yyyy/mm/dd HH:mm:ss,SSS} [%t] %-5p %c %x - %m%n" />
@@ -18,7 +18,7 @@
 
 	<logger name="scala.slick.jdbc">
 		<level value="DEBUG" />
-		<appender-ref ref="stoud" />
+		<appender-ref ref="stout" />
 	</logger>
 
 

@@ -4,58 +4,71 @@ package exec
  * Created by pedrofurla on 31/03/14.
  */
 object JPA {
-  import javax.persistence.{Persistence, EntityManager}
+  object EclipseLinkJPA extends {
+    val persistenceUnit="mysql-eclipselink"
+  } with JPA
 
-  def newFactory = Persistence.createEntityManagerFactory("slickperf-persistence-mysql")
-  def newEntityManager = {
-    newFactory.createEntityManager()
+  object HibernateLinkJPA extends {
+    val persistenceUnit="mysql-hibernate"
+  } with JPA
+}
+trait JPA {
+
+  import javax.persistence.{Persistence, EntityManager, EntityManagerFactory}
+
+  val persistenceUnit:String
+
+  final val emFactory: EntityManagerFactory = Persistence.createEntityManagerFactory(persistenceUnit)
+  final def newEntityManager = emFactory.createEntityManager()
+
+  final val defaultEm:EM = newEntityManager
+
+  final type EM = EntityManager
+  final type EMAction[A] = EM => A
+
+  final def inJpa[A](f: EMAction[A]):A = {
+    val em = newEntityManager
+    val res = f(em)
+    em.close
+    res
   }
+  final def withJpa[A] = (f: EMAction[A]) => f(defaultEm)
 
-  val defaultEm:EM = newEntityManager
-
-  type EM = EntityManager
-  type EMAction[A] = EM => A
-
-  def inJpa[A] = (f: EMAction[A]) => f(newEntityManager)
-  def withJpa[A] = (f: EMAction[A]) => f(defaultEm)
-
-  def inTransaction[A](f: EMAction[A]): EMAction[A] = { em =>
+  final def inTransaction[A](f: EMAction[A]): EMAction[A] = { em =>
     em.getTransaction().begin();
     val b = f(em)
     em.getTransaction().commit();
     b
   }
-  def withTransaction[A]: EMAction[A] => A = withJpa[A] compose inTransaction[A]
+  final def withTransaction[A]: EMAction[A] => A = withJpa[A] compose inTransaction[A]
 
   import exec.Chronograph._
   import TestHelper._
 
-  def performInTransactionN(n:Int)(action:EMAction[Unit]): ElapsedTimeOf[Int] =
+  //type Perform[A,B] = B => EMAction[A] => ElapsedTimeOf[A]
+
+  final def performInTransactionN: Int => EMAction[Unit] => ElapsedTimeOf[Int] = (n:Int) => (action:EMAction[Unit]) =>
     inJpa {
-      micros { const(n) compose inTransaction { em => repeatN(n)(action(em))  }  }
+      micros { const(n) compose inTransaction { em => repeatN(n)(action(em)) } }
     }
 
-  def performNInTransaction(n:Int)(action:EMAction[Unit]): ElapsedTimeOf[Int] =
+  final def performNInTransaction: Int => EMAction[Unit] => ElapsedTimeOf[Int] = (n:Int) => (action:EMAction[Unit]) =>
     inJpa {
       micros { const(n) compose { em => repeatN(n) { inTransaction(action)(em) } } }
     }
 
-  def performWithTransactionN(n:Int)(action:EMAction[Unit]): ElapsedTimeOf[Int] =
-    micros{ (n:Int) => withTransaction { em => repeatN(n)(action(em))  }; n  }(n)
+  final def performWithTransactionN: Int => EMAction[Unit] => ElapsedTimeOf[Int] = (n:Int) => (action:EMAction[Unit]) =>
+    micros{ (n:Int) => withTransaction { em => repeatN(n)(action(em)) }; n }(n)
 
-  def performNWithTransaction(n:Int)(action:EMAction[Unit]): ElapsedTimeOf[Int] =
+  final def performNWithTransaction: Int => EMAction[Unit] => ElapsedTimeOf[Int] = (n:Int) => (action:EMAction[Unit]) =>
     micros{ (n:Int) => repeatN(n) { withTransaction(action) }; n  }(n)
 
-  def performInTransaction[A,B](n:B)(action:EMAction[A]): ElapsedTimeOf[A] =
+  final def performInTransaction[A,B]: B => EMAction[A] => ElapsedTimeOf[A] = (n:B) => (action:EMAction[A]) =>
     inJpa { em =>
       micros[B,A] { n => inTransaction{em => action(em)}(em) }(n)
     }
 
-  def performWithTransaction[A,B](n:B)(action:EMAction[A]): ElapsedTimeOf[A] =
+  final def performWithTransaction[A,B]: B => EMAction[A] => ElapsedTimeOf[A] = (n:B) => (action:EMAction[A]) =>
     micros[B,A] { n => withTransaction { em => action(em) } }(n)
-
-
-
-
 
 }

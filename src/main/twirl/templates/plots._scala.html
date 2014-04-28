@@ -1,0 +1,117 @@
+@(maybeReports:Either[Throwable, List[(Report, Report)]])
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/modules/exporting.js"></script>
+
+</head>
+<body onload="">
+
+    <script>
+    @chart(title:String, reports:(Report,Report), i:Int) = {
+        @reports match { case (srp, jrp) =>
+           $('#container@i').highcharts({
+               chart: {
+                   zoomType: 'xy'
+               },
+               title: { text: '@title' },
+               //subtitle: { text: 'Source: WorldClimate.com' },
+               xAxis: [{
+                   //categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                   categories: [ @(srp.lines.drop(1).map{ case ReportLine(rows, time, timeUnit) => rows }.mkString(",")) ],
+                   labels: { format: '{value} rows',style: { color: '#000000' } }
+               }],
+               yAxis: [{ // Primary yAxis
+                    title: {
+                      text: 'Total running time',
+                      style: { color: '#000000' }
+                    },
+                   labels: {
+                       format: '{value} µs',
+                       style: { color: '#000000' }
+                   }
+
+               }, { // Secondary yAxis
+                   title: {
+                       text: 'Running time per row',
+                       style: { color: '#D0E300' }
+                   },
+                   labels: {
+                       format: '{value} µs',
+                       style: { color: '#D0E300' }
+                   },
+                   opposite: true,
+                   min:0
+               }],
+               tooltip: { shared: true, headerFormat: '{point.key} rows<br/>'},
+               series: [
+                   {
+                   name: 'Slick Total running time',
+                   color: '#4070A0',
+                   type: 'column',
+                   yAxis: 0,
+                   //data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6],
+                   data: [ @srp.lines.drop(1).map{ case ReportLine(rows, time, timeUnit) => @time }.mkString(",") ],
+                   tooltip: { valueSuffix: ' µs' }
+                   },
+                   {
+                     name: 'JPA total running time',
+                     color: '#89A54E',
+                     type: 'column',
+                     yAxis: 0,
+                     //data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6],
+                     data: [ @jrp.lines.drop(1).map{ case ReportLine(rows, time, timeUnit) => @time }.mkString(",") ],
+                     tooltip: { valueSuffix: ' µs' }
+                     },
+                   {
+                   name: 'Slick Running time per row',
+                   color: '#5BA1F5',
+                   type: 'spline',
+                   yAxis: 1,
+                   //data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],
+                   data: [ @(srp.lines.drop(1).map{ _.timePerRow }.mkString(",")) ],
+                   tooltip: { valueSuffix: ' µs' }
+                   },
+                   {
+                      name: 'JPA running time per row',
+                      marker: {
+                          symbol: 'diamond'
+                      },
+                  color: '#BBEB5B',
+                  type: 'spline',
+                  yAxis: 1,
+                  //data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],
+                  data: [ @(jrp.lines.drop(1).map{ _.timePerRow }.mkString(",")) ],
+                  tooltip: { valueSuffix: ' µs' }
+              }]
+           });
+       }
+    }
+    </script>
+
+    @reps(rs:List[(Report,Report)]) = {
+        @rs.zipWithIndex.map { case (tuple, i) =>
+            <div id="container@i" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+            <script>
+               $(function () {
+                @chart(tuple._1.title + " vs " + tuple._2.title,tuple,i)
+               });
+            </script>
+        }
+    }
+
+    @maybeReports.fold(
+        l => <pre> l.getStackTrace.mkString("\n") </pre> ,
+        reps
+    )
+
+
+
+</body>
+</html>

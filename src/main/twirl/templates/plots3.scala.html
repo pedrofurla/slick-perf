@@ -1,0 +1,115 @@
+@(categories:scalaz.NonEmptyList[Int],
+    maybeReports:List[(String, Throwable \/ List[Report])])
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/modules/exporting.js"></script>
+
+</head>
+<body onload="">
+
+
+    @oneSeries[A](line: NonEmptyList[A], title:String, plotType:String, color:String, yAxisIndex: Int) = {
+        {
+           name: '@title',
+           color: '#@color',
+           type: '@plotType',
+           yAxis: @yAxisIndex,
+           data: [ @line.toList.mkString(",") ],
+           tooltip: {
+              valueSuffix: ' µs'
+           }
+         }
+    }
+
+    @import exec.Chronograph2._
+
+    <script>
+    @chart(title:String, reports:List[Report], i:Int) = {
+       $('#container@i').highcharts({
+           chart: {
+               zoomType: 'xy'
+           },
+           title: { text: '@title' },
+           //subtitle: { text: 'Source: WorldClimate.com' },
+           xAxis: [{
+               categories: [ @(categories.toList.mkString(",")) ],
+               labels: { format: '{value} rows',style: { color: '#000000' } }
+           }],
+           yAxis: [{ // Primary yAxis
+                title: {
+                  text: 'Total running time',
+                  style: { color: '#000000' }
+                },
+               labels: {
+                   format: '{value} µs',
+                   style: { color: '#000000' }
+               }
+
+           }, { // Secondary yAxis
+               title: {
+                   text: 'Running time per row',
+                   style: { color: '#D0E300' }
+               },
+               labels: {
+                   format: '{value} µs',
+                   style: { color: '#D0E300' }
+               },
+               opposite: true,
+               min:0
+           }],
+           tooltip: { shared: true, headerFormat: '{point.key} rows<br/>'},
+           series: [
+               @reports.zip(exec.Comparisons2.totalTimeColors).map { case (r@ElapsedTimeOf(title, elapsed ),color)  =>
+                    @{oneSeries(elapsed.time, title, "column", color, 0)}
+                }.reduce(_ + (new Html(",")) + _),
+               @reports.zip(exec.Comparisons2.perRowTimeColors).map { case (r@ElapsedTimeOf(title, ElapsedTime(lines) ),color)  =>
+                   @{oneSeries(lines.zip(categories) map { case(time,n) => time/n.toFloat }, title, "spline", color, 1)}
+               }.reduce(_ + (new Html(",")) + _)
+           ]
+       });
+    }
+
+    </script>
+    @*
+    @import exec.Reports._
+     @import scalaz.syntax.show._ *@
+
+    @reps(title:String, rs:List[Report],i:Int) = {
+        <div id="container@i" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+        @rs.map { r => <ul><li>@r.value</li><li>What comes here?@* @r.show *@</li></ul> }
+        <script>
+           $(function () {
+                @chart(title,rs,i)
+           });
+        </script>
+
+    }
+
+    @maybeReports.zipWithIndex.map { case ((title, maybe),i) =>
+        @maybe.fold(
+            l => <pre> l.getStackTrace.mkString("\n") </pre> ,
+            r => reps(title, r, i)
+        )
+    }
+
+
+    @*
+
+    <pre> @categories.toString </pre>
+
+    @maybeReports.zipWithIndex.map { case ((title, maybe),i) =>
+        <spam> @title </spam>
+        <pre> @maybe.map({ r => r.mkString(",\n\t")}) </pre>
+    }
+
+   *@
+
+</body>
+</html>

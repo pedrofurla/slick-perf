@@ -1,15 +1,18 @@
 package slickperf
 
+//import exec.Reports.Report
+
 /**
  * Created by pedrofurla on 28/03/14.
  */
 object Main {
   def main(args: Array[String]) {
-    MySqlConnection inSchema run
+    //MySqlConnection inSchema run
   }
-
-  def run() {
-    SlickInsert.run
-    SlickQuery.run
-  }
+/*
+  def run = {
+    SlickInsert.run ::
+    SlickQuery.run  ::
+    Nil
+  }*/
 }
