@@ -38,28 +38,28 @@ trait DBConnection {
   def inTransaction[A](f:SlickAction[A]):A = database withTransaction f
   def withTransaction[A](a: => A):A = database withDynTransaction a
 
-  import exec.Chronograph._
+  import exec.Chronograph2._
   import exec.TestHelper.{const,repeatN}
-  def performWithTransactionN[A](n:Int)(action:SlickAction[Unit]): ElapsedTimeOf[Int] =
+  def performWithTransactionN[A](n:Int)(action:SlickAction[Unit]): ElapsedTimeOf[Int,Chronon] =
     withTransaction {
       import DynSession._
-      micros[Int,Int]( n => { repeatN(n)(action(dynSession)); n } )(n)
+      chronograph[Int,Int]( n => { repeatN(n)(action(dynSession)); n } )(n)
     }
 
-  def performInTransactionN(n:Int)(action:SlickAction[Unit]): ElapsedTimeOf[Int] =
+  def performInTransactionN(n:Int)(action:SlickAction[Unit]): ElapsedTimeOf[Int,Chronon] =
      inTransaction {
-       micros { const(n) compose { s => repeatN(n)(action(s)) } }
+       chronograph { const(n) compose { s => repeatN(n)(action(s)) } }
      }
 
-  def performWithTransaction[A,B](n:B)(action:SlickAction[A]): ElapsedTimeOf[A] =
+  def performWithTransaction[A,B](n:B)(action:SlickAction[A]): ElapsedTimeOf[A,Chronon] =
     withTransaction {
       import DynSession._
-      micros[B,A]( n =>  action(dynSession) )(n)
+      chronograph[B,A]( n =>  action(dynSession) )(n)
     }
 
-  def performInTransaction[A,B](n:B)(action:SlickAction[A]): ElapsedTimeOf[A] =
+  def performInTransaction[A,B](n:B)(action:SlickAction[A]): ElapsedTimeOf[A,Chronon] =
      inTransaction { s =>
-       micros[B,A] { n => action(s) }(n)
+       chronograph[B,A] { n => action(s) }(n)
      }
 
 }

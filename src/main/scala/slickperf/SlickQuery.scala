@@ -2,10 +2,8 @@ package slickperf
 
 import exec.TestHelper._
 import exec._
-//import exec.Reports._
 import MySqlConnection._
 import MySqlConnection.simple._
-//import exec.Reports.Report
 
 object SlickQuery extends DbRun  {
 
@@ -29,6 +27,8 @@ object SlickQuery extends DbRun  {
 
   val findUserCompiled = Compiled(findUser _)
 
+  val queries = findUser(1).selectStatement
+
   private final def action(is:List[Long])(s:Session):Int = {
     is map { i =>
       findUserCompiled(i.toInt)
@@ -42,14 +42,10 @@ object SlickQuery extends DbRun  {
 
   def run2(repetitions:NonEmptyList[Int]):ElapsedTimeOf[String, NonEmptyList[Chronon]] = {
 
-    def performWithTransactionN[A](n:Int)(action:SlickAction[Unit]) =
-      withTransaction {
-        import DynSession._
-        chronographN(n)( action )(dynSession)
-      }
-
     println(title)
 
+    import scalaz._
+    val allIds = (1 to repetitions.foldMap1(identity)).map(_.toLong).toList
     val res: NonEmptyList[ElapsedTimeOf[NonEmptyList[Int], NonEmptyList[Chronon]]] = for (i <- repetitions) yield {
       val ids = scala.util.Random.shuffle(allIds).take(i).toList
       printMe(performWithTransactionN(i)(action(ids))).nelnel

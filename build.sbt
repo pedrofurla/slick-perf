@@ -71,7 +71,10 @@ fork in console := true
 //javaHome in run := Option(file("/Library/Java/JavaVirtualMachines/jdk1.7.0_07.jdk/Contents/Home"))
 
 javaOptions in run ++= Seq(
-  "-Dorg.jboss.logging.provider=slf4j"
+  "-Dorg.jboss.logging.provider=slf4j",
+  "-Xmx4096m", "-XX:MaxPermSize=512m", "-Xss4M"
+  //, "-XX:+UseConcMarkSweepGC"
+  //, "-XX:+CMSClassUnloadingEnabled"
   //,"-Xdebug"
   //, "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
   //,"-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"

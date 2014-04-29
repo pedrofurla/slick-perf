@@ -42,33 +42,33 @@ trait JPA {
   }
   final def withTransaction[A]: EMAction[A] => A = withJpa[A] compose inTransaction[A]
 
-  import exec.Chronograph._
+  import exec.Chronograph2._
   import TestHelper._
 
   //type Perform[A,B] = B => EMAction[A] => ElapsedTimeOf[A]
 
-  final def performInTransactionN: Int => EMAction[Unit] => ElapsedTimeOf[Int] = (n:Int) => (action:EMAction[Unit]) =>
+  final def performInTransactionN: Int => EMAction[Unit] => ElapsedTimeOf[Int,Chronon] = (n:Int) => (action:EMAction[Unit]) =>
     inJpa {
-      micros { const(n) compose inTransaction { em => repeatN(n)(action(em)) } }
+      chronograph { const(n) compose inTransaction { em => repeatN(n)(action(em)) } }
     }
 
-  final def performNInTransaction: Int => EMAction[Unit] => ElapsedTimeOf[Int] = (n:Int) => (action:EMAction[Unit]) =>
+  final def performNInTransaction: Int => EMAction[Unit] => ElapsedTimeOf[Int,Chronon] = (n:Int) => (action:EMAction[Unit]) =>
     inJpa {
-      micros { const(n) compose { em => repeatN(n) { inTransaction(action)(em) } } }
+      chronograph { const(n) compose { em => repeatN(n) { inTransaction(action)(em) } } }
     }
 
-  final def performWithTransactionN: Int => EMAction[Unit] => ElapsedTimeOf[Int] = (n:Int) => (action:EMAction[Unit]) =>
-    micros{ (n:Int) => withTransaction { em => repeatN(n)(action(em)) }; n }(n)
+  final def performWithTransactionN: Int => EMAction[Unit] => ElapsedTimeOf[Int,Chronon] = (n:Int) => (action:EMAction[Unit]) =>
+    chronograph{ (n:Int) => withTransaction { em => repeatN(n)(action(em)) }; n }(n)
 
-  final def performNWithTransaction: Int => EMAction[Unit] => ElapsedTimeOf[Int] = (n:Int) => (action:EMAction[Unit]) =>
-    micros{ (n:Int) => repeatN(n) { withTransaction(action) }; n  }(n)
+  final def performNWithTransaction: Int => EMAction[Unit] => ElapsedTimeOf[Int,Chronon] = (n:Int) => (action:EMAction[Unit]) =>
+    chronograph{ (n:Int) => repeatN(n) { withTransaction(action) }; n  }(n)
 
-  final def performInTransaction[A,B]: B => EMAction[A] => ElapsedTimeOf[A] = (n:B) => (action:EMAction[A]) =>
+  final def performInTransaction[A,B]: B => EMAction[A] => ElapsedTimeOf[A,Chronon] = (n:B) => (action:EMAction[A]) =>
     inJpa { em =>
-      micros[B,A] { n => inTransaction{em => action(em)}(em) }(n)
+      chronograph[B,A] { n => inTransaction{em => action(em)}(em) }(n)
     }
 
-  final def performWithTransaction[A,B]: B => EMAction[A] => ElapsedTimeOf[A] = (n:B) => (action:EMAction[A]) =>
-    micros[B,A] { n => withTransaction { em => action(em) } }(n)
+  final def performWithTransaction[A,B]: B => EMAction[A] => ElapsedTimeOf[A,Chronon] = (n:B) => (action:EMAction[A]) =>
+    chronograph[B,A] { n => withTransaction { em => action(em) } }(n)
 
 }

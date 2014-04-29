@@ -8,12 +8,22 @@
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
 
+    <!-- JQuery number formatting from https://github.com/teamdf/jquery-number -->
+    <script src="http://opensource.teamdf.com/number/jquery.number.js"></script>
+
     <script src="http://code.highcharts.com/highcharts.js"></script>
     <script src="http://code.highcharts.com/modules/exporting.js"></script>
 
 </head>
 <body onload="">
 
+    @import exec.JvmSpec
+    <spam>JVM Specifications</spam>
+    <ul>
+        <li>@JvmSpec.version</li>
+        <li>@JvmSpec.info</li>
+        <li>@JvmSpec.arguments</li>
+    </ul>
 
     @oneSeries[A](line: NonEmptyList[A], title:String, plotType:String, color:String, yAxisIndex: Int) = {
         {
@@ -23,7 +33,7 @@
            yAxis: @yAxisIndex,
            data: [ @line.toList.mkString(",") ],
            tooltip: {
-              valueSuffix: ' µs'
+              valueSuffix: ' ns'
            }
          }
     }
@@ -35,6 +45,11 @@
        $('#container@i').highcharts({
            chart: {
                zoomType: 'xy'
+           },
+           legend: {
+                layout: 'vertical',
+                borderWidth: 2,
+                borderRadius: 5
            },
            title: { text: '@title' },
            //subtitle: { text: 'Source: WorldClimate.com' },
@@ -48,7 +63,8 @@
                   style: { color: '#000000' }
                 },
                labels: {
-                   format: '{value} µs',
+                   //format: '{value} ns',
+                   formatter: function() { return $.number(this.value) + " ns" },
                    style: { color: '#000000' }
                }
 
@@ -58,7 +74,8 @@
                    style: { color: '#D0E300' }
                },
                labels: {
-                   format: '{value} µs',
+                   //format: '{value} ns',
+                   formatter: function() { return $.number(this.value) + " ns" },
                    style: { color: '#D0E300' }
                },
                opposite: true,

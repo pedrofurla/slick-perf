@@ -68,7 +68,14 @@ object RunCharts {
   def run2():Unit = {
     import Comparisons2._
     import scalaz._
-    val comparison = new SlickVsHibernate(NonEmptyList(1,10,20,30,40,50)).comparisons
+    val reps = NonEmptyList(
+      1, 10, 20, 30, 40, 50
+      ,100, 200, 300, 400, 500
+      ,1000,2000,3000,4000,5000
+      ,6000,7000,8000,9000,10000
+      //,20000, 30000, 40000, 50000
+    )
+    val comparison =new SlickVsHibernate(reps).comparisons
     val result = comparison.run
 
     val contents = templates.html.plots3(comparison.amendedRepetitions, result).body
@@ -77,19 +84,50 @@ object RunCharts {
   }
 
 
-  /*def runTest():Unit = {
-    import Comparisons._
-    val comparison = new SlickVsHibernate(TestHelper.numberOfInserts.take(6)).comparisons
+  def runTest():Unit = {
+    import Comparisons2._
+    import scalaz._
+    val reps = NonEmptyList(
+      1, 10, 20, 30, 40, 50
+      ,100, 200//, 300, 400, 500
+    )
+    val comparison =new SlickVsHibernate(reps).comparisons
     val result = comparison.run
 
-    val contents = templates.html.plots2(comparison.amendedRepetitions, result).body
+    val contents = templates.html.plots3(comparison.amendedRepetitions, result).body
 
     writeFile(contents, "html/output-test.html")
-  }*/
+  }
+
+
 
   def main(args: Array[String]) {
     //load()
     //runTest()
-    run2
+
+    import JvmSpec._
+    println(version)
+    println(info)
+    println(s"arguments: $arguments")
+
+    runTest()
+
+
+
   }
+}
+
+object JvmSpec {
+  import sys._
+  import java.lang.management.ManagementFactory;
+  import collection.JavaConversions._
+
+  private val jvmline1 =List("java.runtime.name", "java.runtime.version")
+  private val jvmline2 = List("java.vm.name", "java.vm.version","java.vm.info")
+  val version = jvmline1.map(props(_)).mkString(" ")
+  val info = jvmline2.map(props(_)).mkString(" ")
+
+  private val runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+  val arguments = runtimeMxBean.getInputArguments().toList.mkString(" ");
+
 }

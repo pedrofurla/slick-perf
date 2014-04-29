@@ -2,24 +2,13 @@ package jpaperf
 
 import javax.persistence.EntityManager
 import exec.TestHelper._
-import exec.{DbRun, Chronograph}
-//import exec.Reports._
+import exec.DbRun
 import exec.JPA._
 
 class JPAInsert(jpa:exec.JPA) extends DbRun {
   import jpa._
 
   val title = s"JPA ${jpa.persistenceUnit} Inserting users and one account per user" // + " with one connection"
-
- /* def run(repetitions:List[Int]):Report = {
-    println(title)
-    printMe(Report(title,
-    for (i <- repetitions) yield {
-      //printMe(reportLine(performWithTransactionN(i)(action(_))))
-      printMe(reportLine(performInTransactionN(i)(action(_))))
-    },
-    Chronograph.Micros))
-  }*/
 
   val action2: EntityManager => Unit = (em:EntityManager) => {
     val user = newUser
@@ -60,10 +49,6 @@ class JPAInsert(jpa:exec.JPA) extends DbRun {
   import Scalaz._
 
   def run2(repetitions:NonEmptyList[Int]):ElapsedTimeOf[String, NonEmptyList[Chronon]] = {
-    def performWithTransactionN[A](n:Int)(action:EMAction[Unit]): ElapsedTimeOf[Int, Chronon] =
-      inJpa {
-        inTransaction { chronographN(n)( action ) }
-      }
 
     println(title)
 

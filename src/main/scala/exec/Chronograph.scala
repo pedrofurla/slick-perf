@@ -8,6 +8,7 @@ import scalaz.syntax.MonoidSyntax
  *
  * Created by pedrofurla on 31/03/14.
  */
+/*
 object Chronograph {
 
   /** Chronon is the quantum of time, here in our silly computers it is a Long, I guess Double could be equally valid
@@ -61,6 +62,7 @@ object Chronograph {
   def micros[A,B](f:A => B): A => ElapsedTimeOf[B] = chronograph(Micros)(f)
   def millis[A,B](f:A => B): A => ElapsedTimeOf[B] = chronograph(Millis)(f)
 }
+*/
 
 
 object Chronograph2 {
