@@ -27,9 +27,9 @@ object SlickInsert extends DbRun {
   import scalaz._
   import Scalaz._
 
-  def run2(repetitions:NonEmptyList[Int]):ElapsedTimeOf[String, NonEmptyList[Chronon]] = {
+  def run2(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]] = {
     println(title)
-    val res: NonEmptyList[ElapsedTimeOf[NonEmptyList[Int], NonEmptyList[Chronon]]] = for (i <- repetitions) yield {
+    val res: NEL[ElapsedTimeOf[NEL[Int], NEL[Chronon]]] = for (i <- repetitions) yield {
       printMe(performWithTransactionN(i)(action(_))).nelnel
     }
 

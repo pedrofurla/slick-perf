@@ -3,7 +3,7 @@ package jpaperf
 import javax.persistence.EntityManager
 import exec.TestHelper._
 import exec.DbRun
-import exec.JPA._
+import exec._
 
 class JPAInsert(jpa:exec.JPA) extends DbRun {
   import jpa._
@@ -48,11 +48,11 @@ class JPAInsert(jpa:exec.JPA) extends DbRun {
   import scalaz._
   import Scalaz._
 
-  def run2(repetitions:NonEmptyList[Int]):ElapsedTimeOf[String, NonEmptyList[Chronon]] = {
+  def run2(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]] = {
 
     println(title)
 
-    val res: NonEmptyList[ElapsedTimeOf[NonEmptyList[Int], NonEmptyList[Chronon]]] = for (i <- repetitions) yield {
+    val res: NEL[ElapsedTimeOf[NEL[Int], NEL[Chronon]]] = for (i <- repetitions) yield {
       printMe(performWithTransactionN(i)(action(_))).nelnel
     }
     val tmp = res.foldMap1(identity)

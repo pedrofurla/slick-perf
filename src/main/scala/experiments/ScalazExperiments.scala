@@ -8,14 +8,14 @@ import exec.Chronograph2._
 object ScalazExperiments {
 
   type Chronon = Long
-
+  import scalaz.NonEmptyList
+  type NEL[+A] = NonEmptyList[A]
+  val Nel = NonEmptyList
+  
   object Other {
     import scalaz._
     import Scalaz._
-
-    type NEL[A] = NonEmptyList[A]
-    val NEL = NonEmptyList
-
+  
     type ET_CC[CC[_]] = {
       type λ[A]=ElapsedTime[CC[A]]
     }
@@ -26,7 +26,7 @@ object ScalazExperiments {
 
     /** Elapsed time for a given time unit in nano seconds*/
     case class ElapsedTime[A](time: A) {
-      def nel/*(implicit ev: A =!= NEL[_])*/ = ElapsedTime(NEL.nels(time))
+      def nel/*(implicit ev: A =!= NEL[_])*/ = ElapsedTime(Nel.nels(time))
     }
     trait LowPriorityElapsedTime {
       implicit def isApplicative_Id = new Applicative[ElapsedTime] {
@@ -75,7 +75,7 @@ object ScalazExperiments {
 
       //implicitly[Applicative[ET_CC[Id]#λ]]
 
-      val sample: ElapsedTime[NEL[Long]] = ElapsedTime(NonEmptyList.nels(1L,2L,3L))
+      val sample: ElapsedTime[NEL[Long]] = ElapsedTime(Nel(1L,2L,3L))
 
       sample.map{_ + 1 }
       //ElapsedTime(1) map { _ + 1 }
@@ -87,8 +87,8 @@ object ScalazExperiments {
     }
 
     case class ElapsedTimeOf[A,B](value:A, elapsed: ElapsedTime[B]) {
-      def nel = this.copy(value = NEL.nels(value))
-      def nelnel = this.copy(value = NEL.nels(value), elapsed = elapsed.nel)
+      def nel = this.copy(value = Nel.nels(value))
+      def nelnel = this.copy(value = Nel.nels(value), elapsed = elapsed.nel)
     }
 
     object ElapsedTimeOf {
@@ -107,7 +107,7 @@ object ScalazExperiments {
 
       implicit def EtoPimps[ETB](implicit met:Monoid[ElapsedTime[ETB]]) = new Applicative[ETO_NEL[ETB]#λ] with Foldable1[ETO_NEL[ETB]#λ] {
         type F[A] = ElapsedTimeOf[NEL[A],ETB]
-        def point[A](a: => A): F[A] = ElapsedTimeOf(NEL.nels(a), met.zero)
+        def point[A](a: => A): F[A] = ElapsedTimeOf(Nel.nels(a), met.zero)
         def ap[A,B](fa: => F[A])(f: => F[A => B]): F[B] = fa.copy(fa.value <*> f.value) // TODO^^ f.time is lost, this is wrong!
         // override def map[A, B](fa: F[A])(f: A => B): F[B] = ap(fa)(point(f)) // Applicative.map
 
@@ -118,7 +118,7 @@ object ScalazExperiments {
 
       implicit def EtoPimps2[ETB](implicit met:Semigroup[ElapsedTime[NEL[ETB]]], metb:Monoid[ETB]) = new Applicative[ETO_NEL_NEL[ETB]#λ] with Foldable1[ETO_NEL_NEL[ETB]#λ] {
         type F[A] = ElapsedTimeOf[NEL[A],NEL[ETB]]
-        def point[A](a: => A): F[A] = ElapsedTimeOf(NEL.nels(a), Applicative[ET_CC[NEL]#λ].point(metb.zero)) // TODO metb.zero? This is questionable
+        def point[A](a: => A): F[A] = ElapsedTimeOf(Nel.nels(a), Applicative[ET_CC[NEL]#λ].point(metb.zero)) // TODO metb.zero? This is questionable
         def ap[A,B](fa: => F[A])(f: => F[A => B]): F[B] = fa.copy(fa.value <*> f.value) // TODO^^ f.time is lost, this is wrong!
         // override def map[A, B](fa: F[A])(f: A => B): F[B] = ap(fa)(point(f)) // Applicative.map
 
@@ -182,19 +182,19 @@ object ScalazExperiments {
 
       val ETO = ElapsedTimeOf
 
-      ETO(NEL.nels(1,2,3),elapseds(1,2,3)).map(_ + 1)
-      ETO(NEL.nels(1,2,3),elapsed(1)).map(_ + 1)
+      ETO(Nel(1,2,3),elapseds(1,2,3)).map(_ + 1)
+      ETO(Nel(1,2,3),elapsed(1)).map(_ + 1)
 
-      ETO(NEL.nels(1,2,3),elapseds(1,2,3)).bimap(_ + 1, _ + 1)
+      ETO(Nel.nels(1,2,3),elapseds(1,2,3)).bimap(_ + 1, _ + 1)
       //ETO(NEL.nels(1,2,3),elapsed(1)).bimap(_ + 1, _ + 1)
       //val x = ETO(NEL.nels(1,2,3),elapsed(1)).sequence
 
     }
 
     def elapsed(c:Chronon) = ElapsedTime[Chronon](c)
-    def elapseds(c:Chronon, cs:Chronon*):ElapsedTime[NEL[Chronon]] = ElapsedTime[NEL[Chronon]](NEL(c, cs:_*))
+    def elapseds(c:Chronon, cs:Chronon*):ElapsedTime[NEL[Chronon]] = ElapsedTime[NEL[Chronon]](Nel(c, cs:_*))
     def elapsedOf[A,B](a:A,e:ElapsedTime[B]) = ElapsedTimeOf[A,B](a,e)
-    def ofElapsed[A,B](e:ElapsedTime[B], a:A, as:A*) = ElapsedTimeOf(NEL(a, as:_*),e)
+    def ofElapsed[A,B](e:ElapsedTime[B], a:A, as:A*) = ElapsedTimeOf(Nel(a, as:_*),e)
 
     case class XXX[A, Phantom](value:A)
     object XXX {
@@ -226,7 +226,7 @@ object ScalazExperiments {
 
       implicitly[Functor[XXX_CC[NEL,PhantomCC]#λ]]
 
-      XXX[NEL[Int],PhantomCC](NEL.nels(1,2,3)).map(_ + 1)
+      XXX[NEL[Int],PhantomCC](Nel(1,2,3)).map(_ + 1)
 
 
       implicitly[Functor[XXX_CC[Id,_]#λ]]
@@ -240,7 +240,7 @@ object ScalazExperiments {
 
       implicitly[Functor[X.XXX_CC[NEL,X.PhantomCC]#λ]]
 
-      X[NEL[Int],X.PhantomCC](NEL.nels(1,2,3)).map(_ + 1)
+      X[NEL[Int],X.PhantomCC](Nel(1,2,3)).map(_ + 1)
 
       X[Int,X.PhantomId](1).map(_ + 1)
 
@@ -289,7 +289,6 @@ object ScalazExperiments {
       type ET_A[CC[_]] = {
         type λ[A]=ElapsedTime[A, CC]
       }
-      type NEL[A] = NonEmptyList[A]
 
       type ET_A_NEL = {
         type λ[A]=ElapsedTime[A, NEL]
@@ -305,13 +304,13 @@ object ScalazExperiments {
 
       implicitly[Functor[ET_A[NEL]#λ]]
 
-      ElapsedTime(NonEmptyList.nels(1,2,3)).map(_+1)
+      ElapsedTime(Nel(1,2,3)).map(_+1)
 
 
 
     }
 
-    ElapsedTime(NonEmptyList.nels(1,2,3)).map(_+1)
+    ElapsedTime(Nel(1,2,3)).map(_+1)
   }
 
 }

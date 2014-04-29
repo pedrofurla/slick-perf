@@ -96,14 +96,11 @@ object Comparisons2 {
   final val jpaE = JPA.EclipseLinkJPA
   final val jpaH = JPA.HibernateLinkJPA
 
-  val Nel = NonEmptyList
-  type Nel[+A] = NonEmptyList[A]
+  type Report = ElapsedTimeOf[String, NEL[Chronon]]
 
-  type Report = ElapsedTimeOf[String, NonEmptyList[Chronon]]
+  type RunWrapper = (NEL[Int],List[DbRun]) => \/[Throwable, List[Report]]
 
-  type RunWrapper = (Nel[Int],List[DbRun]) => \/[Throwable, List[Report]]
-
-  def jpaRunWrapper(jpa: JPA): RunWrapper = (reps:Nel[Int], runs:List[DbRun]) =>
+  def jpaRunWrapper(jpa: JPA): RunWrapper = (reps:NEL[Int], runs:List[DbRun]) =>
     MySqlConnection inSchema {
       val r = runs map { _.run2(reps) }
       println(s"Closing emFactory of ${jpa.persistenceUnit}")
@@ -111,7 +108,7 @@ object Comparisons2 {
       r
     }
 
-  val slickRunWrapper: RunWrapper = (reps:Nel[Int], runs: List[DbRun]) =>
+  val slickRunWrapper: RunWrapper = (reps:NEL[Int], runs: List[DbRun]) =>
     MySqlConnection inSchema { runs map { _.run2(reps) } }
 
   val totalTimeColors = List("4070A0",/*"89A54E",*/"823333")
@@ -125,7 +122,7 @@ object Comparisons2 {
 
   /** Gathers Runs, how many times each run should be repeated, and how to run. */
   case class RunsComparison[N <: Nat](
-       repetitions:NonEmptyList[Int],
+       repetitions:NEL[Int],
        runs:List[Runs[N]],
        runWrappers: Sized[Seq[RunWrapper],N]) {
 
@@ -159,7 +156,7 @@ object Comparisons2 {
     // TODO^^ get rid of the above GET !!!!
   }
 
-  class SlickVsHibernate(val repetitions:Nel[Int]) {
+  class SlickVsHibernate(val repetitions:NEL[Int]) {
     val inserts = Runs(
       "Insertion: Slick x EclipseLink x Hibernate",
       Sized(SlickInsert, /*new JPAInsert(jpaE),*/ new JPAInsert(jpaH))

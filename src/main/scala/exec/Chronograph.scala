@@ -1,6 +1,5 @@
 package exec
 
-import scalaz.syntax.MonoidSyntax
 
 /**
  *
@@ -96,9 +95,6 @@ object Chronograph2 {
 
   import scalaz._
   import Scalaz._
-
-  type NEL[A] = NonEmptyList[A]
-  val Nel = NonEmptyList
 
   type ET_CC[CC[_]] = {
     type λ[A]=ElapsedTime[CC[A]]

@@ -9,7 +9,6 @@ trait DbRun {
 
   //def run(repetitions:List[Int]):Report
 
-  import scalaz.NonEmptyList
   import exec.Chronograph2._
-  def run2(repetitions:NonEmptyList[Int]):ElapsedTimeOf[String, NonEmptyList[Chronon]]
+  def run2(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]]
 }

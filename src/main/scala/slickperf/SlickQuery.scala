@@ -40,13 +40,13 @@ object SlickQuery extends DbRun  {
   import Scalaz._
   import exec.Chronograph2._
 
-  def run2(repetitions:NonEmptyList[Int]):ElapsedTimeOf[String, NonEmptyList[Chronon]] = {
+  def run2(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]] = {
 
     println(title)
 
     import scalaz._
     val allIds = (1 to repetitions.foldMap1(identity)).map(_.toLong).toList
-    val res: NonEmptyList[ElapsedTimeOf[NonEmptyList[Int], NonEmptyList[Chronon]]] = for (i <- repetitions) yield {
+    val res: NEL[ElapsedTimeOf[NEL[Int], NEL[Chronon]]] = for (i <- repetitions) yield {
       val ids = scala.util.Random.shuffle(allIds).take(i).toList
       printMe(performWithTransactionN(i)(action(ids))).nelnel
     }
