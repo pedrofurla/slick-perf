@@ -7,64 +7,7 @@ package exec
  *
  * Created by pedrofurla on 31/03/14.
  */
-/*
-object Chronograph {
-
-  /** Chronon is the quantum of time, here in our silly computers it is a Long, I guess Double could be equally valid
-      but dealing with floating points wouldn't be very useful for the project use case */
-  type Chronon = Long
-
-  /**
-   *
-   * @param chrononsInSecond how many time units are there in a second?
-   * @param name name of the time unit
-   */
-  sealed case class TimeUnit(chrononsInSecond: Chronon, name:String) 
-
-  private final val nanosInSeconds = 1e9.toLong
-
-  object TimeUnit {
-    /** Knows how to obtain "now" in a TimeUnit */
-    implicit class TimeUnitOps(val tu:TimeUnit) extends AnyVal {
-      def getTime2 = System.nanoTime()/(nanosInSeconds/tu.chrononsInSecond)
-    }
-
-  }
-
-  val Nanos  = new TimeUnit(nanosInSeconds, "ns")
-  val Micros = new TimeUnit(1e6.toLong, "μs")
-  val Millis = new TimeUnit(1e3.toLong, "ms")
-
-  import scalaz._
-  import Scalaz._
-
-  /** Elapsed time for a given time unit */
-  case class ElapsedTime(time: Chronon, unit:TimeUnit)
-
-  /** The result of measuring how long it takes to obtain a `B` */
-  //case class ElapsedTimeOf[B](value:B, elapsed: Chronon, unit:TimeUnit)
-  case class ElapsedTimeOf[A](value:A, elapsed: ElapsedTime)
-
-
-  /** Times the execution of `u` */
-  def chronometer[B](u: => B): TimeUnit => ElapsedTimeOf[B] = (timer: TimeUnit) => {
-    val start = timer.getTime2
-    val res = u
-    val end = timer.getTime2
-    ElapsedTimeOf(res, ElapsedTime(end - start, timer))
-  }
-
-  /** Times the execution of `f` */
-  def chronograph[A,B](timer: TimeUnit)(f: (A => B)): A => ElapsedTimeOf[B] = a => chronometer(f(a))(timer)
-
-  def nanos[A,B](f:A => B): A => ElapsedTimeOf[B] = chronograph(Nanos)(f)
-  def micros[A,B](f:A => B): A => ElapsedTimeOf[B] = chronograph(Micros)(f)
-  def millis[A,B](f:A => B): A => ElapsedTimeOf[B] = chronograph(Millis)(f)
-}
-*/
-
-
-object Chronograph2 {
+object Chronometer {
 
   /** Chronon is the quantum of time, here in our silly computers it is a Long, I guess Double could be equally valid
       but dealing with floating points wouldn't be very useful for the project use case */
@@ -77,18 +20,18 @@ object Chronograph2 {
    */
   case class TimeUnit(chrononsInSecond: Chronon, name:String)
 
-  final val nanosInSeconds = 1e9.toLong
+  final val nanosInSecond = 1e9.toLong
 
   object TimeUnit {
     /** Knows how to obtain "now" in a TimeUnit */
     implicit class TimeUnitOps(val tu:TimeUnit) extends AnyVal {
-      def getTime = System.nanoTime()/(nanosInSeconds/tu.chrononsInSecond)
+      def getTime = System.nanoTime()/(nanosInSecond/tu.chrononsInSecond)
       /** Only safe for narrowing the precision, widening will lose information. */
       def as(v:Chronon, other:TimeUnit) = (v/(tu.chrononsInSecond/other.chrononsInSecond.toDouble)).toLong
     }
   }
 
-  val Nanos   = new TimeUnit(nanosInSeconds, "ns")
+  val Nanos   = new TimeUnit(nanosInSecond, "ns")
   val Micros  = new TimeUnit(1e6.toLong, "μs")
   val Millis  = new TimeUnit(1e3.toLong, "ms")
   val Seconds = new TimeUnit(1L, "s")

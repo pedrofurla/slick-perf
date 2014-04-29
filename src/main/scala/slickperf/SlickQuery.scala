@@ -38,7 +38,7 @@ object SlickQuery extends DbRun  {
 
   import scalaz._
   import Scalaz._
-  import exec.Chronograph2._
+  import exec.Chronometer._
 
   def run2(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]] = {
 

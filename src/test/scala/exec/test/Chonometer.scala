@@ -1,12 +1,13 @@
 package exec
+package test
 
 import org.scalatest.FunSuite
 
 /**
  * Created by pedrofurla on 17/04/14.
  */
-object ChronographTest2 extends FunSuite {
-  import Chronograph2._
+class Chronometer extends FunSuite {
+  import Chronometer._
 
   import scalaz._
   import Scalaz._
@@ -110,17 +111,17 @@ object ChronographTest2 extends FunSuite {
   }
 
   test("ElapsedTimeOf[X, NEL] is a semigroup if monoid on A and a semigroup on CC") {
-    val left1 = elapsedOf(1, elapseds(10,11))
     val left0 = elapsedOf(Monoid[Int].zero, elapseds(5))
+    val left1 = elapsedOf(1, elapseds(10,11))
     assertResult(
       left1 |+| elapsedOf(2, elapseds(15))
     )(
-      elapsedOf(3, elapseds(10,11,5))
+      elapsedOf(3, elapseds(10,11,15))
     )
     assertResult(
       left0 |+| left1
     )(
-      elapsedOf(1, elapseds(10,11,5))
+      elapsedOf(1, elapseds(5,10,11))
     )
   }
   test("ElapsedTimeOf[NEL, NEL] is a semigroup") {

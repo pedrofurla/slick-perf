@@ -5,7 +5,7 @@ import exec._
 //import exec.Reports._
 import MySqlConnection._
 import MySqlConnection.simple._
-import exec.Chronograph2.{Chronon, ElapsedTimeOf}
+import exec.Chronometer.{Chronon, ElapsedTimeOf}
 
 object SlickInsert extends DbRun {
 
@@ -23,7 +23,7 @@ object SlickInsert extends DbRun {
   private final def newUser = MainTcUserRow(0, Some("test"), Some("test"), Some("test"), Some("test"))
   private final def newPayAccount(userId:Int) = PayTdAccountRow(0, Some(500), Some(200), userId)
 
-  import exec.Chronograph2._
+  import exec.Chronometer._
   import scalaz._
   import Scalaz._
 

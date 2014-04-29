@@ -9,6 +9,6 @@ trait DbRun {
 
   //def run(repetitions:List[Int]):Report
 
-  import exec.Chronograph2._
+  import exec.Chronometer._
   def run2(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]]
 }

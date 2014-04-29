@@ -38,7 +38,7 @@ trait DBConnection {
   def inTransaction[A](f:SlickAction[A]):A = database withTransaction f
   def withTransaction[A](a: => A):A = database withDynTransaction a
 
-  import exec.Chronograph2._
+  import exec.Chronometer._
   import exec.TestHelper.{const,repeatN}
   def performWithTransactionN[A](n:Int)(action:SlickAction[Unit]): ElapsedTimeOf[Int,Chronon] =
     withTransaction {

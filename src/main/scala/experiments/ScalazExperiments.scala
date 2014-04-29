@@ -1,6 +1,6 @@
 package experiments
 
-import exec.Chronograph2._
+import exec.Chronometer._
 
 /**
  * Created by pedrofurla on 19/04/14.

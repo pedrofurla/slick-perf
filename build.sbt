@@ -5,19 +5,21 @@ version := "1.0"
 
 scalaVersion := "2.11.0"
 
+
+//addCompilerPlugin("org.brianmckenna" %% "wartremover" % "0.8")
+
+//scalacOptions in (Compile, compile) += "-P:wartremover:traverser:org.brianmckenna.wartremover.warts.Unsafe"
+
+
+// ************** DEPENDENCIES
+
 resolvers in ThisBuild ++= Seq(
   "Typesafe releases" at "http://repo.typesafe.com/typesafe/releases/",
   "Sonatype releases" at "http://oss.sonatype.org/content/repositories/releases/",
   Resolver.url("sbt-plugin-releases", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns)
 )
 
-//addCompilerPlugin("org.brianmckenna" %% "wartremover" % "0.8")
-
-//scalacOptions in (Compile, compile) += "-P:wartremover:traverser:org.brianmckenna.wartremover.warts.Unsafe"
-
 // libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value
-
-// DEPENDENCIES
 
 val shapeless = Seq("com.chuusai" % "shapeless_2.11" % "2.0.0")
 
@@ -64,6 +66,8 @@ libraryDependencies ++=
   hibernateEntityManager ++
   hibernateCore // for schemaExport
 
+// ************** Runtime config
+
 fork in run := true
 
 fork in console := true
@@ -83,11 +87,8 @@ javaOptions in run ++= Seq(
 initialCommands in console :=
   """
     |import exec.TestHelper._
-    |//import exec.Chronograph._
-    |import exec.Chronograph2._
+    |import exec.Chronometer._
     |//import exec.Comparisons._
-    |//import exec.Report
-    |//import exec.Report._
     |import slickperf._
     |import MySqlConnection._
     |import MySqlConnection.simple._
@@ -98,16 +99,11 @@ initialCommands in console :=
     |import exec.RunCharts._
     |import scalaz._
     |import Scalaz._
-    |
-    |//val e = elapsed _
-    |//val eo = elapsedOf[Chronon, Id] _
-    |//val l = List(elapsedOf(1,elapsed(1)),elapsedOf(1,elapsed(1)))
   """.stripMargin
 
 initialCommands in Test :=
   """
     |import experiments.ScalazExperiments.Other._
-    |import exec.ChronographTest2._
     |import scalaz._
     |import Scalaz._
     |
@@ -120,7 +116,7 @@ seq(Twirl.settings: _*)
 
 twirlImports ++=
   Seq(//"exec.Reports._",
-    "exec.Comparisons2.Report",
+    "exec.Comparisons._",
     "scalaz._",
     "Scalaz._")
 

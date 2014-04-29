@@ -42,7 +42,7 @@ trait JPA {
   }
   final def withTransaction[A]: EMAction[A] => A = withJpa[A] compose inTransaction[A]
 
-  import exec.Chronograph2._
+  import exec.Chronometer._
   import TestHelper._
 
   //type Perform[A,B] = B => EMAction[A] => ElapsedTimeOf[A]

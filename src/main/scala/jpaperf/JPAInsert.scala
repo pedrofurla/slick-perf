@@ -44,7 +44,7 @@ class JPAInsert(jpa:exec.JPA) extends DbRun {
     account
   }
 
-  import exec.Chronograph2._
+  import exec.Chronometer._
   import scalaz._
   import Scalaz._
 

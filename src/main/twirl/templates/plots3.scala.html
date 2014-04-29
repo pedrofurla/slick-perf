@@ -38,7 +38,7 @@
          }
     }
 
-    @import exec.Chronograph2._
+    @import exec.Chronometer._
 
     <script>
     @chart(title:String, reports:List[Report], i:Int) = {
@@ -83,10 +83,10 @@
            }],
            tooltip: { shared: true, headerFormat: '{point.key} rows<br/>'},
            series: [
-               @reports.zip(exec.Comparisons2.totalTimeColors).map { case (r@ElapsedTimeOf(title, elapsed ),color)  =>
+               @reports.zip(exec.Comparisons.totalTimeColors).map { case (r@ElapsedTimeOf(title, elapsed ),color)  =>
                     @{oneSeries(elapsed.time, title, "column", color, 0)}
                 }.reduce(_ + (new Html(",")) + _),
-               @reports.zip(exec.Comparisons2.perRowTimeColors).map { case (r@ElapsedTimeOf(title, ElapsedTime(lines) ),color)  =>
+               @reports.zip(exec.Comparisons.perRowTimeColors).map { case (r@ElapsedTimeOf(title, ElapsedTime(lines) ),color)  =>
                    @{oneSeries(lines.zip(categories) map { case(time,n) => time/n.toFloat }, title, "spline", color, 1)}
                }.reduce(_ + (new Html(",")) + _)
            ]
@@ -94,9 +94,7 @@
     }
 
     </script>
-    @*
-    @import exec.Reports._
-     @import scalaz.syntax.show._ *@
+
 
     @reps(title:String, rs:List[Report],i:Int) = {
         <div id="container@i" style="min-width: 310px; height: 400px; margin: 0 auto"></div>

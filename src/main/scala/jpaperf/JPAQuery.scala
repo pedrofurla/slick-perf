@@ -30,7 +30,7 @@ class JPAQuery(jpa:exec.JPA) extends DbRun {
     }
     ids.length
   }
-  import exec.Chronograph2._
+  import exec.Chronometer._
   import scalaz._
   import Scalaz._
 

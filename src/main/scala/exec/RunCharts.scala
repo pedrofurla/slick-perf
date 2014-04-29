@@ -66,7 +66,7 @@ object RunCharts {
   }*/
 
   def run2():Unit = {
-    import Comparisons2._
+    import Comparisons._
     import scalaz._
     val reps = Nel(
       1, 10, 20, 30, 40, 50
@@ -85,7 +85,7 @@ object RunCharts {
 
 
   def runTest():Unit = {
-    import Comparisons2._
+    import Comparisons._
     import scalaz._
     val reps = Nel(
       1, 10, 20, 30, 40, 50
