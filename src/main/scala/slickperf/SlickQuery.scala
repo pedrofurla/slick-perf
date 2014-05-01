@@ -2,8 +2,9 @@ package slickperf
 
 import exec.TestHelper._
 import exec._
-import MySqlConnection._
-import MySqlConnection.simple._
+import support.SlickMySql
+import SlickMySql._
+import SlickMySql.simple._
 
 object SlickQuery extends DbRun  {
 
@@ -40,7 +41,7 @@ object SlickQuery extends DbRun  {
   import Scalaz._
   import exec.Chronometer._
 
-  def run2(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]] = {
+  def run(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]] = {
 
     println(title)
 

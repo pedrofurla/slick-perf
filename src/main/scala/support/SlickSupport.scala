@@ -1,13 +1,8 @@
-package slickperf
+package support
 
 import scala.slick.driver.JdbcProfile
 
-trait ConnectionTemplate {
-  val url:String
-  val username:String
-  val password:String
-  val driver:String
-}
+case class ConnectionTemplate(url:String, username:String, password:String, driver:String)
 
 trait SlickProfile {
   val profile: JdbcProfile
@@ -18,9 +13,13 @@ trait SlickProfile {
   }
 }
 
-trait DBConnection {
-  this: ConnectionTemplate with SlickProfile =>
+trait SlickConnection {
+  this: SlickProfile =>
 
+  val dbConnection: ConnectionTemplate
+  
+  import dbConnection._
+  
   import simple._
   final val database: Database =  Database.forURL( url, username, password,null, driver)
 
@@ -45,6 +44,13 @@ trait DBConnection {
       import DynSession._
       chronograph[Int,Int]( n => { repeatN(n)(action(dynSession)); n } )(n)
     }
+  /* RepeatN should return a list or nel and ElapsedTimeOf[Nel[B],Chronon] will make more sense
+  def performWithTransactionN2[A,B](n:Int)(action:SlickAction[B]): ElapsedTimeOf[B,Chronon] =
+      withTransaction {
+        import DynSession._
+        chronograph[Int,B]( n => { repeatN(n)(action(dynSession)); } )(n)
+      }
+  */
 
   def performInTransactionN(n:Int)(action:SlickAction[Unit]): ElapsedTimeOf[Int,Chronon] =
      inTransaction {
@@ -64,8 +70,12 @@ trait DBConnection {
 
 }
 
-trait CommonConnection extends SlickProfile with DBConnection with Tables {
-  this: ConnectionTemplate =>
+trait TablesDefinition extends SlickProfile {
+  val ddl: profile.DDL
+}
+
+trait CommonConnection extends SlickProfile with SlickConnection {
+  this: TablesDefinition =>
 
   import simple._
 
@@ -77,39 +87,47 @@ trait CommonConnection extends SlickProfile with DBConnection with Tables {
     createSchema
     val res = allCatch either f
     destroySchema
-
+    res.fold(_.printStackTrace(), _ => ())
     \/.fromEither(res)
   }
 }
 
-trait MySqlConnection extends ConnectionTemplate {
-  val url = "jdbc:mysql://localhost:3306/slickperf"
-  val username = "root"
-  val password = ""
-  val driver = "com.mysql.jdbc.Driver"
-}
-trait PostgresConnection extends ConnectionTemplate {
-  val url = "jdbc:postgresql://127.0.0.1:5432/slickperf"
-  val username = "root"
-  val password = ""
-  val driver = "org.postgresql.Driver"
+object SlickConnection {
+
+  val mySqlConnection = ConnectionTemplate (
+     url = "jdbc:mysql://localhost:3306/slickperf",
+     username = "root",
+     password = "",
+     driver = "com.mysql.jdbc.Driver"
+  )
+
+  val postgresConnection = ConnectionTemplate (
+     url = "jdbc:postgresql://127.0.0.1:5432/slickperf",
+     username = "root",
+     password = "",
+     driver = "org.postgresql.Driver"
+  )
+
+  val mySqlConnection2 = ConnectionTemplate (
+     url = "jdbc:mysql://localhost:3306/jpa2",
+     username = "root",
+     password = "",
+     driver = "com.mysql.jdbc.Driver"
+  )
 }
 
-object MySqlConnection extends {
+import SlickConnection._
+object SlickMySql extends {
+  val dbConnection = mySqlConnection
   val profile = scala.slick.driver.MySQLDriver
-} with MySqlConnection with CommonConnection
+} with CommonConnection with slickperf.Tables
 
-object PostgresConnection extends {
+object SlickPostgres extends {
+  val dbConnection = postgresConnection  
   val profile = scala.slick.driver.PostgresDriver
-} with PostgresConnection with CommonConnection
+} with CommonConnection  with slickperf.Tables
 
-
-trait MySqlConnection2 extends ConnectionTemplate {
-  val url = "jdbc:mysql://localhost:3306/jpa2"
-  val username = "root"
-  val password = ""
-  val driver = "com.mysql.jdbc.Driver"
-}
-object MySqlConnection2 extends {
+object SlickMySql2 extends {
+  val dbConnection = mySqlConnection2
   val profile = scala.slick.driver.MySQLDriver
-} with SlickProfile with MySqlConnection2 with DBConnection with Tables2
+} with  CommonConnection with slickperf.Tables2

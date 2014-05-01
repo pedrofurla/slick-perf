@@ -1,6 +1,7 @@
 package jpaperf
 
-import slickperf.MySqlConnection
+import support.SlickMySql
+
 //import exec.Reports.Report
 
 /**

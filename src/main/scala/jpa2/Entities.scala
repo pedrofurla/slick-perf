@@ -2,15 +2,19 @@ package jpa2
 
 import javax.persistence._
 import scala.beans.BeanProperty
+import support.Jpa
 
 /**
  * Created by pedrofurla on 08/04/14.
+ *
+ * Mappings and hibernate entities based on the blog post http://blog.jbaysolutions.com/2012/12/17/jpa-2-relationships-many-to-many/
+ *
  */
 object Entities {
 
   object jpa2 extends {
     val persistenceUnit="jpa2-mysql"
-  } with exec.JPA
+  } with Jpa
 
   //val jpa2 = newEntityManager("jpa2-mysql")
 
@@ -52,36 +56,42 @@ class Client {
   @BeanProperty
   var address:String = _
 
-  import java.util.Collection
+  import java.util.Set
   import java.util.Collections
 
   @ManyToMany(mappedBy = "clientCollection")
-  var companyCollection:Collection[Company] = Collections.emptySet();
+  var companyCollection:Set[Company] = Collections.emptySet();
+
+  def toTuple = (id,name,address,companyCollection)
+
+  override def hashCode() = toTuple.hashCode()
+
+  override def equals(obj: scala.Any) = toTuple.equals(obj.asInstanceOf[Client].toTuple)
 }
 
 @Entity
 @Table(name = "company")
 class Company {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "id")
-    @BeanProperty
-    var id:Int = _
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Basic(optional = false)
+  @Column(name = "id")
+  @BeanProperty
+  var id: Int = _
 
-    @Basic(optional = false)
-    @Column(name = "name")
-    @BeanProperty
-    var name:String = _
+  @Basic(optional = false)
+  @Column(name = "name")
+  @BeanProperty
+  var name: String = _
 
-    @Basic(optional = false)
-    @Column(name = "address")
-    @BeanProperty
-    var address:String = _
+  @Basic(optional = false)
+  @Column(name = "address")
+  @BeanProperty
+  var address: String = _
 
 
-  import java.util.Collection
+  import java.util.Set
   import java.util.Collections
 
   @JoinTable(
@@ -91,11 +101,18 @@ class Company {
   )
   @ManyToMany
   @BeanProperty
-  var clientCollection: Collection[Client] = Collections.emptySet()
+  var clientCollection: Set[Client] = Collections.emptySet()
 
   @OneToMany(cascade = Array(CascadeType.ALL), mappedBy = "company")
   @BeanProperty
-  var employeeCollection: Collection[Employee] = Collections.emptySet()
+  var employeeCollection: Set[Employee] = Collections.emptySet()
+
+  def toTuple = (id,name,address,clientCollection,employeeCollection)
+
+  override def hashCode() = toTuple.hashCode()
+
+  override def equals(obj: scala.Any) = toTuple.equals(obj.asInstanceOf[Company].toTuple)
+
 }
 
 
@@ -108,25 +125,31 @@ class Company {
   new NamedQuery(name = "Employee.findByPhone", query = "SELECT e FROM Employee e WHERE e.phone = :phone")))
  class Employee  {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "id")
-    @BeanProperty
-    var id:Int=_;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Basic(optional = false)
+  @Column(name = "id")
+  @BeanProperty
+  var id: Int = _;
 
-    @Basic(optional = false)
-    @Column(name = "name")
-    @BeanProperty
-    var name:String = _;
+  @Basic(optional = false)
+  @Column(name = "name")
+  @BeanProperty
+  var name: String = _;
 
-    @Basic(optional = false)
-    @Column(name = "phone")
-    @BeanProperty
-    var phone: String = _;
+  @Basic(optional = false)
+  @Column(name = "phone")
+  @BeanProperty
+  var phone: String = _;
 
-    @JoinColumn(name = "companyId", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    @BeanProperty
-    var company:Company=_;
+  @JoinColumn(name = "company_id", referencedColumnName = "id")
+  @ManyToOne(optional = false)
+  @BeanProperty
+  var company: Company = _;
+
+  def toTuple = (id,name,phone,company)
+
+  override def hashCode() = toTuple.hashCode()
+
+  override def equals(obj: scala.Any) = toTuple.equals(obj.asInstanceOf[Employee].toTuple)
 }

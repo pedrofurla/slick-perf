@@ -90,8 +90,8 @@ initialCommands in console :=
     |import exec.Chronometer._
     |//import exec.Comparisons._
     |import slickperf._
-    |import MySqlConnection._
-    |import MySqlConnection.simple._
+    |import SlickMySql._
+    |import SlickMySql.simple._
     |//import exec.CSV._
     |
     |//import shapeless.{Id => _, _}
@@ -99,6 +99,8 @@ initialCommands in console :=
     |import exec.RunCharts._
     |import scalaz._
     |import Scalaz._
+    |
+    |val m2 = SlickMySql2
   """.stripMargin
 
 initialCommands in Test :=

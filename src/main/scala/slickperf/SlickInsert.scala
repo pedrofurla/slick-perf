@@ -2,9 +2,11 @@ package slickperf
 
 import exec.TestHelper._
 import exec._
+import support.SlickMySql
+
 //import exec.Reports._
-import MySqlConnection._
-import MySqlConnection.simple._
+import SlickMySql._
+import SlickMySql.simple._
 import exec.Chronometer.{Chronon, ElapsedTimeOf}
 
 object SlickInsert extends DbRun {
@@ -27,7 +29,7 @@ object SlickInsert extends DbRun {
   import scalaz._
   import Scalaz._
 
-  def run2(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]] = {
+  def run(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]] = {
     println(title)
     val res: NEL[ElapsedTimeOf[NEL[Int], NEL[Chronon]]] = for (i <- repetitions) yield {
       printMe(performWithTransactionN(i)(action(_))).nelnel

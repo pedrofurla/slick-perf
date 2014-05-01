@@ -3,10 +3,12 @@ package jpaperf
 import javax.persistence.EntityManager
 import exec.TestHelper._
 import exec._
+import support.Jpa
 
-class JPAQuery(jpa:exec.JPA) extends DbRun {
+class JpaQuery(jpa:Jpa) extends DbRun {
 
   import jpa._
+  import EntitiesOld._
 
   val title = s"JPA ${jpa.persistenceUnit} Querying users and its accounts"
 
@@ -19,7 +21,6 @@ class JPAQuery(jpa:exec.JPA) extends DbRun {
     ids.map{ i =>
       import scala.collection.JavaConversions._
       val users = query.setParameter(1, i).getResultList()
-
       val result = for {
         u <- users
         acc <- u.asInstanceOf[MainUser].getPayAccountList
@@ -30,11 +31,12 @@ class JPAQuery(jpa:exec.JPA) extends DbRun {
     }
     ids.length
   }
+
   import exec.Chronometer._
   import scalaz._
   import Scalaz._
 
-  def run2(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]] = {
+  def run(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]] = {
     println(title)
 
     import scalaz._

@@ -43,4 +43,28 @@ object TestHelper {
     }
   }
 
+  import java.io._
+  def saveObject(fileName:String, obj: Any):Unit = {
+    val fileOut = new FileOutputStream(fileName);
+    val out = new ObjectOutputStream(fileOut);
+    out.writeObject(obj);
+    out.close();
+    fileOut.close();
+  }
+  def loadObject[T](fileName:String):T = {
+    val file = new FileInputStream(fileName);
+    val in = new ObjectInputStream(file);
+    val obj = in.readObject();
+    in.close();
+    file.close();
+    obj.asInstanceOf[T]
+  }
+
+  def writeFile(contents: String,filename:String) {
+    val writer = new PrintWriter(new File(filename))
+    writer.write(contents)
+    writer.close()
+  }
+
+
 }

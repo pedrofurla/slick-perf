@@ -1,7 +1,7 @@
 package exec
 
-import slickperf.{SlickInsert, MySqlConnection}
-import jpaperf.JPAInsert
+import slickperf.SlickInsert
+import jpaperf.JpaInsert
 //import exec.Reports.Report
 
 /**
@@ -9,25 +9,8 @@ import jpaperf.JPAInsert
  */
 object RunCharts {
 
-  import java.io._
 
   import scalaz._
-
-  def saveObject(fileName:String, obj: Any):Unit = {
-    val fileOut = new FileOutputStream(fileName);
-    val out = new ObjectOutputStream(fileOut);
-    out.writeObject(obj);
-    out.close();
-    fileOut.close();
-  }
-  def loadObject[T](fileName:String):T = {
-    val file = new FileInputStream(fileName);
-    val in = new ObjectInputStream(file);
-    val obj = in.readObject();
-    in.close();
-    file.close();
-    obj.asInstanceOf[T]
-  }
 
   /*def save():Unit = {
     val slickRep: \/[Throwable, List[Report]] = MySqlConnection inSchema slickperf.Main.run
@@ -48,13 +31,6 @@ object RunCharts {
     writeFile(contents, "html/output.html")
   }*/
 
-
-  def writeFile(contents: String,filename:String) {
-    val writer = new PrintWriter(new File(filename))
-    writer.write(contents)
-    writer.close()
-  }
-
   /*def run():Unit = {
     import Comparisons._
     val comparison = new SlickVsHibernate(TestHelper.numberOfInserts).comparisons
@@ -65,7 +41,9 @@ object RunCharts {
     writeFile(contents, "html/output2.html")
   }*/
 
-  def run2():Unit = {
+  import TestHelper.writeFile
+
+  def run():Unit = {
     import Comparisons._
     import scalaz._
     val reps = Nel(
@@ -89,7 +67,8 @@ object RunCharts {
     import scalaz._
     val reps = Nel(
       1, 10, 20, 30, 40, 50
-      ,100, 200//, 300, 400, 500
+      ,100, 200, 300, 400, 500
+      ,1000,2000,3000,4000,5000
     )
     val comparison =new SlickVsHibernate(reps).comparisons
     val result = comparison.run
@@ -99,6 +78,21 @@ object RunCharts {
     writeFile(contents, "html/output-test.html")
   }
 
+  def runTest2():Unit = {
+    import Comparisons._
+    import scalaz._
+    val reps = Nel(
+      1, 10, 20, 30, 40, 50
+      ,100, 200, 300, 400, 500
+      ,1000,2000,3000,4000,5000
+    )
+    val comparison =new Slick2VsHibernate(reps).comparisons
+    val result = comparison.run
+
+    val contents = templates.html.plots3(comparison.amendedRepetitions, result).body
+
+    writeFile(contents, "html/output-test-v2.html")
+  }
 
 
   def main(args: Array[String]) {
@@ -111,8 +105,7 @@ object RunCharts {
     println(s"arguments: $arguments")
 
     runTest()
-
-
+    //runTest2()
 
   }
 }
@@ -129,5 +122,4 @@ object JvmSpec {
 
   private val runtimeMxBean = ManagementFactory.getRuntimeMXBean();
   val arguments = runtimeMxBean.getInputArguments().toList.mkString(" ");
-
 }

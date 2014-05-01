@@ -2,40 +2,40 @@ package jpaperf
 
 import javax.persistence.EntityManager
 import exec.TestHelper._
-import exec.DbRun
 import exec._
 import support.Jpa
 
-class JpaInsert(jpa:Jpa) extends DbRun {
+class JpaInsert2(jpa:Jpa) extends DbRun {
   import jpa._
-  import EntitiesOld._
 
   val title = s"JPA ${jpa.persistenceUnit} Inserting users and one account per user" // + " with one connection"
 
+  import jpa2._
+
   private final def action(em:EntityManager):Unit = {
-    val user = newUser
-    em persist user
-
-    val account = newAccount(user)
-    em persist account
+    val c = newCompany
+    em persist c
+    val reminder = 1 //(c.getId % 5) + 1
+    for(i <- 1 to reminder) {
+      val e = newEmployee(c) // TODO is there some batch we can do here?
+      em persist e
+    }
   }
 
-  private final def newUser:MainUser = {
-    val user = new MainUser
-    user.username = "zlaja"
-    user.password = "zlaja"
-    user.name = "zlaja"
-    user.surname = "zlaja"
-    user
+  private final def newCompany:Company = {
+    val c = new Company
+    c.setName("zlaja")
+    c.setAddress("zlaja")
+    c
   }
 
-  private final def newAccount(user:MainUser) = {
-    val account = new PayAccount
-    account.reserved = 200
-    account.amount = 200
-    account.setUserId(user)
-    //user.getPayAccountList.add(account)
-    account
+  private final def newEmployee(company:Company) = {
+    val e = new Employee
+    e.setName("name")
+    e.setPhone("phone#")
+    e.setCompany(company)
+    //user.getPayAccountList.add(e)
+    e
   }
 
   import exec.Chronometer._

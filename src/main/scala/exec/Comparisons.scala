@@ -1,5 +1,7 @@
 package exec
 
+import support._
+
 /**
  * Created by pedrofurla on 17/04/14.
  */
@@ -10,23 +12,34 @@ object Comparisons {
   import Scalaz._
   import Chronometer._
 
-  final val jpaE = JPA.EclipseLinkJPA
-  final val jpaH = JPA.HibernateLinkJPA
+  lazy val jpaE = Jpa.EclipseLinkJpa
+  lazy val jpaH = Jpa.HibernateJpa
+  lazy val jpaH2 = Jpa.HibernateJpa2
 
+  /** A report is a "title" + a Nel of ElapsedTimes */
   type Report = ElapsedTimeOf[String, NEL[Chronon]]
 
   type RunWrapper = (NEL[Int],List[DbRun]) => \/[Throwable, List[Report]]
 
-  def jpaRunWrapper(jpa: JPA): RunWrapper = (reps:NEL[Int], runs:List[DbRun]) =>
-    MySqlConnection inSchema {
-      val r = runs map { _.run2(reps) }
+  final def jpaRunWrapper(jpa: Jpa): RunWrapper = (reps:NEL[Int], runs:List[DbRun]) =>
+    SlickMySql inSchema {
+      val r = runs map { _.run(reps) }
       println(s"Closing emFactory of ${jpa.persistenceUnit}")
       jpa.emFactory.close
       r
-    }
+    } leftMap {x => x.printStackTrace(); jpa.emFactory.close; x} // TODO HORRIBLE HACK. FIX ME!
 
-  val slickRunWrapper: RunWrapper = (reps:NEL[Int], runs: List[DbRun]) =>
-    MySqlConnection inSchema { runs map { _.run2(reps) } }
+  final def jpaRunWrapper2(jpa: Jpa): RunWrapper = (reps:NEL[Int], runs:List[DbRun]) =>
+    SlickMySql2 inSchema {
+      val r = runs map { _.run(reps) }
+      println(s"Closing emFactory of ${jpa.persistenceUnit}")
+      jpa.emFactory.close
+      r
+    } leftMap {x => x.printStackTrace(); jpa.emFactory.close; x} // TODO HORRIBLE HACK. FIX ME!
+
+
+  final def slickRunWrapper(slick:CommonConnection with TablesDefinition): RunWrapper = (reps:NEL[Int], runs: List[DbRun]) =>
+    slick inSchema { runs map { _.run(reps) } } leftMap {x => x.printStackTrace(); x}          // TODO HORRIBLE HACK. FIX ME!
 
   val totalTimeColors = List("4070A0",/*"89A54E",*/"823333")
   val perRowTimeColors = List("4070FF",/*"89FF4E",*/"FF3333")
@@ -76,18 +89,36 @@ object Comparisons {
   class SlickVsHibernate(val repetitions:NEL[Int]) {
     val inserts = Runs(
       "Insertion: Slick x EclipseLink x Hibernate",
-      Sized(SlickInsert, /*new JPAInsert(jpaE),*/ new JPAInsert(jpaH))
+      Sized(SlickInsert, /*new JPAInsert(jpaE),*/ new JpaInsert(jpaH))
     )
 
     val queries = Runs(
         "Queries: Slick x EclipseLink x Hibernate",
-        Sized(SlickQuery, /*new JPAQuery(jpaE),*/ new JPAQuery(jpaH))
+        Sized(SlickQuery, /*new JPAQuery(jpaE),*/ new JpaQuery(jpaH))
     )
 
     val comparisons = RunsComparison(
       repetitions,
-      List(inserts,queries),
-      Sized(slickRunWrapper, /*jpaRunWrapper(jpaE),*/ jpaRunWrapper(jpaH))
+      List(inserts/*,queries*/),
+      Sized(slickRunWrapper(SlickMySql), /*jpaRunWrapper(jpaE),*/ jpaRunWrapper(jpaH))
+    )
+  }
+
+  class Slick2VsHibernate(val repetitions:NEL[Int]) {
+    val inserts = Runs(
+      "Insertion: Slick2 x Hibernate",
+      Sized(SlickInsertCompany,  new JpaInsert2(jpaH2))
+    )
+
+    /*val queries = Runs(
+        "Queries: Slick x EclipseLink x Hibernate",
+        Sized(SlickQuery, new JPAQuery(jpaH))
+    )*/
+
+    val comparisons = RunsComparison(
+      repetitions,
+      List(inserts/*,queries*/),
+      Sized(slickRunWrapper(SlickMySql2),  jpaRunWrapper2(jpaH2))
     )
   }
 }

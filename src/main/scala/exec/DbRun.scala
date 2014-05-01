@@ -10,5 +10,8 @@ trait DbRun {
   //def run(repetitions:List[Int]):Report
 
   import exec.Chronometer._
-  def run2(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]]
+  import Comparisons.Report
+
+  /** A run takes a list of repetitions and returns a resport.  */
+  def run(repetitions:NEL[Int]):Report
 }
