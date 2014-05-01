@@ -3,8 +3,8 @@ package slickperf
 import exec.TestHelper._
 import exec._
 import support.SlickInstances._
-import SlickMySql2._
-import SlickMySql2.simple._
+import SlickMySql._
+import SlickMySql.simple._
 
 object SlickInsertCompanyEmployee extends DbRun {
 

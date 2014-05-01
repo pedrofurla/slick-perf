@@ -1,4 +1,4 @@
-package jpaperf
+package jpaperf.old
 
 import javax.persistence.EntityManager
 import exec.TestHelper._
@@ -38,8 +38,6 @@ class JpaQuery(jpa:JpaConnection) extends DbRun {
 
   def run(repetitions:NEL[Int]):ElapsedTimeOf[String, NEL[Chronon]] = {
     println(title)
-
-    import scalaz._
     val allIds = (1 to repetitions.foldMap1(identity)).map(_.toLong).toList
     val res: NEL[ElapsedTimeOf[NEL[Int], NEL[Chronon]]] = for (i <- repetitions) yield {
       val ids = allIds.take(i).toList

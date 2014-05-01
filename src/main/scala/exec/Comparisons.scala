@@ -1,13 +1,12 @@
 package exec
 
 import support._
+import jpaperf.old.{JpaQuery, JpaInsert}
 
 /**
  * Created by pedrofurla on 17/04/14.
  */
 object Comparisons {
-  import slickperf._
-  import jpaperf._
   import scalaz._
   import Scalaz._
   import Chronometer._
@@ -23,7 +22,7 @@ object Comparisons {
   type RunWrapper = (NEL[Int],List[DbRun]) => \/[Throwable, List[Report]]
 
   final def jpaRunWrapper(jpa: JpaConnection): RunWrapper = (reps:NEL[Int], runs:List[DbRun]) =>
-    SlickMySql inSchema {
+    SlickMySqlOld inSchema {
       val r = runs map { _.run(reps) }
       println(s"Closing emFactory of ${jpa.persistenceUnit}")
       jpa.emFactory.close
@@ -31,7 +30,7 @@ object Comparisons {
     } leftMap {x => x.printStackTrace(); jpa.emFactory.close; x} // TODO HORRIBLE HACK. FIX ME!
 
   final def jpaRunWrapper2(jpa: JpaConnection): RunWrapper = (reps:NEL[Int], runs:List[DbRun]) =>
-    SlickMySql2 inSchema {
+    SlickMySql inSchema {
       val r = runs map { _.run(reps) }
       println(s"Closing emFactory of ${jpa.persistenceUnit}")
       jpa.emFactory.close
@@ -88,6 +87,9 @@ object Comparisons {
   }
 
   class SlickVsHibernate(val repetitions:NEL[Int]) {
+    import slickperf.old._
+    import jpaperf.old._
+
     val inserts = Runs(
       "Insertion: Slick x EclipseLink x Hibernate",
       Sized(SlickInsert, /*new JPAInsert(jpaE),*/ new JpaInsert(jpaH))
@@ -101,11 +103,14 @@ object Comparisons {
     val comparisons = RunsComparison(
       repetitions,
       List(inserts/*,queries*/),
-      Sized(slickRunWrapper(SlickMySql), /*jpaRunWrapper(jpaE),*/ jpaRunWrapper(jpaH))
+      Sized(slickRunWrapper(SlickMySqlOld), /*jpaRunWrapper(jpaE),*/ jpaRunWrapper(jpaH))
     )
   }
 
   class Slick2VsHibernate(val repetitions:NEL[Int]) {
+    import slickperf._
+    import jpaperf._
+
     val inserts = Runs(
       "Insertion: Slick2 x Hibernate",
       Sized(SlickInsertCompanyEmployee,  new JpaInsertCompanyEmployee(jpaH2))
@@ -119,7 +124,7 @@ object Comparisons {
     val comparisons = RunsComparison(
       repetitions,
       List(inserts/*,queries*/),
-      Sized(slickRunWrapper(SlickMySql2),  jpaRunWrapper2(jpaH2))
+      Sized(slickRunWrapper(SlickMySql),  jpaRunWrapper2(jpaH2))
     )
   }
 }

@@ -10,7 +10,6 @@ class JpaInsertCompanyEmployee(jpa:JpaConnection) extends DbRun {
 
   val title = s"JPA ${jpa.persistenceUnit} Inserting companies and employees" // + " with one connection"
 
-  import jpa2._
   import Entities._
 
   private final def action(em:EntityManager):Unit = {

@@ -1,10 +1,10 @@
-package slickperf
+package slickperf.old
 
 import exec.TestHelper._
 import exec._
 import support.SlickInstances._
-import SlickMySql._
-import SlickMySql.simple._
+import SlickMySqlOld._
+import SlickMySqlOld.simple._
 
 object SlickQuery extends DbRun  {
 

@@ -1,11 +1,11 @@
-package slickperf
+package slickperf.old
 
 import exec.TestHelper._
 import exec._
 import support.SlickInstances._
-import SlickMySql._
-import SlickMySql.simple._
-import exec.Chronometer.{Chronon, ElapsedTimeOf}
+import SlickMySqlOld._
+import SlickMySqlOld.simple._
+import exec.Chronometer.Chronon
 
 object SlickInsert extends DbRun {
 

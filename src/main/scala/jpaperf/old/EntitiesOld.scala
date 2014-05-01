@@ -1,5 +1,4 @@
-package jpaperf
-
+package jpaperf.old
 
 /**
  * Created by pedrofurla on 01/05/14.

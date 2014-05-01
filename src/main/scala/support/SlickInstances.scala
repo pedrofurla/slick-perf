@@ -1,5 +1,7 @@
 package support
 
+import slickperf.old.TablesOld
+
 /**
  * Created by pedrofurla on 01/05/14.
  */
@@ -25,18 +27,18 @@ object SlickInstances {
      driver = "com.mysql.jdbc.Driver"
   )
 
-  object SlickMySql extends {
+  object SlickMySqlOld extends {
     val jdbc = mySqlConnection
     val profile = scala.slick.driver.MySQLDriver
-  } with StdSlickSupport with slickperf.Tables
+  } with StdSlickSupport with TablesOld
 
-  object SlickPostgres extends {
+  object SlickPostgresOld extends {
     val jdbc = postgresConnection
     val profile = scala.slick.driver.PostgresDriver
-  } with StdSlickSupport with slickperf.Tables
+  } with StdSlickSupport with TablesOld
 
-  object SlickMySql2 extends {
+  object SlickMySql extends {
     val jdbc = mySqlConnection2
     val profile = scala.slick.driver.MySQLDriver
-  } with StdSlickSupport with slickperf.Tables2
+  } with StdSlickSupport with slickperf.Tables
 }

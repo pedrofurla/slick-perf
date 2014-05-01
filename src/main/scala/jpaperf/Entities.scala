@@ -1,4 +1,4 @@
-package jpa2
+package jpaperf
 
 import javax.persistence._
 import scala.beans.BeanProperty

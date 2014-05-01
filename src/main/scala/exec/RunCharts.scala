@@ -1,7 +1,8 @@
 package exec
 
-import slickperf.SlickInsert
-import jpaperf.JpaInsert
+import slickperf.old.SlickInsert
+import jpaperf.old.JpaInsert
+
 //import exec.Reports.Report
 
 /**

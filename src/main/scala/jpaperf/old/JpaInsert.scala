@@ -1,8 +1,7 @@
-package jpaperf
+package jpaperf.old
 
 import javax.persistence.EntityManager
 import exec.TestHelper._
-import exec.DbRun
 import exec._
 import support.JpaConnection
 

@@ -2,78 +2,151 @@ package slickperf
 
 import support.{TablesDefinition, SlickSupport, SlickProfile}
 
-// AUTO-GENERATED Slick data model
-/** Stand-alone Slick data model for immediate use */
-
-/** Slick data model trait for extension, choice of backend or usage in the cake pattern. (Make sure to initialize this late.) */
 trait Tables extends TablesDefinition { self: SlickSupport with SlickProfile =>
 
   import profile.simple._
-  import scala.slick.model.ForeignKeyAction
-  // NOTE: GetResult mappers for plain SQL are only generated for tables where Slick knows how to map the types of all columns.
+
+  lazy val ddl: profile.DDL = Clients.ddl ++ Companies.ddl ++ CompanyClients.ddl ++ Employees.ddl
+
+  // *** THE MODEL
+  case class CompanyRow(id: Int, address: String, name: String)
+  case class CompanyClientsRow(companyId: Int, clientId: Int)
+  case class EmployeeRow(id: Int, name: String, phone: String, company: Int)
+  case class ClientRow(id: Int, address: Option[String], name: String)
+
+  // *** THE MAPPINGS
+  class Clients(tag: Tag) extends Table[ClientRow](tag, "client") {
+    def * = (id, address, name) <> (ClientRow.tupled, ClientRow.unapply)
+    def ? = (id.?, address, name.?).shaped.<>(
+      { r:(Option[Int],Option[String],Option[String]) =>
+        import r._
+        _1.map(_ => ClientRow.tupled((_1.get,_2,_3.get)))
+      },
+      (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    
+    val id: Column[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    val address: Column[Option[String]] = column[Option[String]]("address")
+    val name: Column[String] = column[String]("name")
+  }
+
+  lazy val Clients = new TableQuery(tag => new Clients(tag))
+
+  class Companies(tag: Tag) extends Table[CompanyRow](tag, "company") {
+    def * = (id, address, name) <> (CompanyRow.tupled, CompanyRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (id.?, address.?, name.?).shaped.<>(
+      { r:(Option[Int],Option[String],Option[String]) =>
+        import r._
+        _1.map(_=> CompanyRow.tupled((_1.get, _2.get, _3.get)))
+      }, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    
+    val id: Column[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    val address: Column[String] = column[String]("address")
+    val name: Column[String] = column[String]("name")
+  }
+
+  lazy val Companies = new TableQuery(tag => new Companies(tag))
+
+  class CompanyClients(tag: Tag) extends Table[CompanyClientsRow](tag, "company_clients") {
+    def * = (companyId, clientId) <> (CompanyClientsRow.tupled, CompanyClientsRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (companyId.?, clientId.?).shaped.<>(
+      { r:(Option[Int],Option[Int]) =>
+        import r._; 
+        _1.map(_=> CompanyClientsRow.tupled((_1.get, _2.get)))
+      }, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    
+    val companyId: Column[Int] = column[Int]("company_id")
+    val clientId: Column[Int] = column[Int]("client_id")
+
+    val pk = primaryKey(this.tableName+"_pk", (companyId,clientId))
+
+    val index1 = index(this.tableName+"_idx_clientId", clientId)
+    val index2 = index(this.tableName+"_idx_companyId", companyId)
+    lazy val companyFk = foreignKey(this.tableName+"_company_fk", companyId, Companies)(_.id)
+    lazy val clientFk = foreignKey(this.tableName+"_client_fk", clientId, Clients)(_.id)
+  }
+
+  lazy val CompanyClients = new TableQuery(tag => new CompanyClients(tag))
+
+  class Employees(tag: Tag) extends Table[EmployeeRow](tag, "employee") {
+    def * = (id, name, phone, companyId) <> (EmployeeRow.tupled, EmployeeRow.unapply)
+
+    def ? = (id.?, name.?, phone.?, companyId.?).shaped.<>(
+      { r:(Option[Int],Option[String],Option[String],Option[Int]) =>
+        import r._ 
+        _1.map(_=> EmployeeRow.tupled((_1.get, _2.get, _3.get, _4.get)))
+      }, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    
+    val id: Column[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    val name: Column[String] = column[String]("name")
+    val phone: Column[String] = column[String]("phone")
+    val companyId: Column[Int] = column[Int]("company_id")
+    
+    val index1 = index(this.tableName+"_idx_companyId", companyId)
+    lazy val companyFk = foreignKey(this.tableName+"_company_fk", companyId, Companies)(_.id)
+  }
+  
+  lazy val Employees = new TableQuery(tag => new Employees(tag))
+
   import scala.slick.jdbc.{GetResult => GR}
 
-  lazy val ddl:self.profile.DDL = MainTcUser.ddl ++ PayTdAccount.ddl ++ PayTdiAccountItem.ddl
+  // **** JDBC RESULT 'EXTRACTORS' *****
+  implicit def GetResultEmployeeRow(implicit e0: GR[Int], e1: GR[String]): GR[EmployeeRow] = GR{
+    prs => import prs._
+    EmployeeRow.tupled((<<[Int], <<[String], <<[String], <<[Int]))
+  }
+  implicit def GetResultCompanyClientsRow(implicit e0: GR[Int]): GR[CompanyClientsRow] = GR{
+    prs => import prs._
+    CompanyClientsRow.tupled((<<[Int], <<[Int]))
+  }
+  implicit def GetResultCompanyRow(implicit e0: GR[Int], e1: GR[String]): GR[CompanyRow] = GR{
+    prs => import prs._
+    CompanyRow.tupled((<<[Int], <<[String], <<[String]))
+  }
+  implicit def GetResultClientRow(implicit e0: GR[Int], e1: GR[Option[String]], e2: GR[String]): GR[ClientRow] = GR{
+    prs => import prs._
+    ClientRow.tupled((<<[Int], <<?[String], <<[String]))
+  }
   
-  case class MainTcUserRow(id: Int, name: Option[String], surname: Option[String], username: Option[String], password: Option[String])
+  // TODO^^ remove these tests!!!
 
-  class MainTcUser(tag: Tag) extends Table[MainTcUserRow](tag, "main_tc_user") {
-    def * = (id, name, surname, username, password) <> (MainTcUserRow.tupled, MainTcUserRow.unapply)
-    def ? = (id.?, name, surname, username, password).shaped.<>({r=>import r._; _1.map(_=> MainTcUserRow.tupled((_1.get, _2, _3, _4, _5)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
-    
-    val id: Column[Int] = column[Int]("id", O.PrimaryKey,O.AutoInc)
-    val name: Column[Option[String]] = column[Option[String]]("name")
-    val surname: Column[Option[String]] = column[Option[String]]("surname")
-    val username: Column[Option[String]] = column[Option[String]]("username")
-    val password: Column[Option[String]] = column[Option[String]]("password")
-  }
+  /*
+  val x = for {
+    (c,e) <- Company leftJoin Employee on (_.id === _.companyId)
+  } yield (c,e)
+  val s:Session = null
+  val res = x.list(s)
+  val res2 = x.first(s)
 
-  lazy val MainTcUser = new TableQuery(tag => new MainTcUser(tag))
+/*
+  val x2 = (for {
+    (c,e) <- Company leftJoin Employee on (_.id === _.companyId)
+  } yield (c,e)) map { r => (r._1, Option(r._2)) } // no good, doesn't know how to pack
+  val res2 = x2.list()(s)
+*/
+
+  val x3 = (for {
+    (c,e) <- Company leftJoin Employee on (_.id === _.companyId)
+  } yield (c,e))
+  val res3 = x3.list(s) map { r => (r._1, Option(r._2)) }
+
+  val x4 = (for {
+    (c,e) <- Company leftJoin Employee on (_.id === _.companyId)
+  } yield (c,e.?)) // Employee got def ? = (id.?, name.?, phone.?, companyId.?).shaped.<>({r=>import r._; _1.map(_=> EmployeeRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("ommited"))
+  val res4 = x4.list(s)
+
+  val x5 = (for {
+      ((c,e),cc) <- (Company leftJoin Employee on (_.id === _.companyId)) leftJoin CompanyClients on { case ((c,e), cc) => cc.companyId === c.id }
+    } yield (c,e, cc))
+
+  val restricted = x5.filter{ case (company, employee, cclient) => company.name === "ACME" }
 
 
-  case class PayTdAccountRow(id: Int, amount: Option[Double], reserved: Option[Double], userId: Int)
+/*  val x6 = (for {
+      (c,e) <- Company leftJoin Employee on (_.id === _.companyId)
+      (c2, cc) <- c leftJoin CompanyClients on { case (c, cc) => cc.companyId === c.id }
+    } yield (c2, e, cc))*/
 
-  class PayTdAccount(tag: Tag) extends Table[PayTdAccountRow](tag, "pay_td_account") {
-    def * = (id, amount, reserved, userId) <> (PayTdAccountRow.tupled, PayTdAccountRow.unapply)
-    def ? = (id.?, amount, reserved, userId.?).shaped.<>({r=>import r._; _1.map(_=> PayTdAccountRow.tupled((_1.get, _2, _3, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
-    
-    val id: Column[Int] = column[Int]("id", O.PrimaryKey, O.AutoInc)
-    val amount: Column[Option[Double]] = column[Option[Double]]("amount")
-    val reserved: Column[Option[Double]] = column[Option[Double]]("reserved")
-    val userId: Column[Int] = column[Int]("user_id")
-    
-    lazy val mainTcUserFk = foreignKey("fk_PAY_TD_ACCOUNT_MAIN_TC_USER", userId, MainTcUser)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
-  }
-
-  lazy val PayTdAccount = new TableQuery(tag => new PayTdAccount(tag))
-
-  case class PayTdiAccountItemRow(id: Int, amount: Option[String], transactionType: Option[Int], inserted: Option[java.sql.Timestamp], accountId: Int)
-
-  class PayTdiAccountItem(tag: Tag) extends Table[PayTdiAccountItemRow](tag, "pay_tdi_account_item") {
-    def * = (id, amount, transactionType, inserted, accountId) <> (PayTdiAccountItemRow.tupled, PayTdiAccountItemRow.unapply)
-    def ? = (id.?, amount, transactionType, inserted, accountId.?).shaped.<>({r=>import r._; _1.map(_=> PayTdiAccountItemRow.tupled((_1.get, _2, _3, _4, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
-    
-    val id: Column[Int] = column[Int]("id", O.PrimaryKey)
-    val amount: Column[Option[String]] = column[Option[String]]("amount")
-    val transactionType: Column[Option[Int]] = column[Option[Int]]("transaction_type")
-    val inserted: Column[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("inserted")
-    val accountId: Column[Int] = column[Int]("account_id")
-    
-    lazy val payTdAccountFk = foreignKey("fk_PAY_TDI_ACCOUNT_PAY_TD_ACCOUNT1", accountId, PayTdAccount)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
-  }
-
-  lazy val PayTdiAccountItem = new TableQuery(tag => new PayTdiAccountItem(tag))
-
-  implicit def GetResultMainTcUserRow(implicit e0: GR[Int], e1: GR[Option[String]]): GR[MainTcUserRow] = GR{
-    prs => import prs._
-    MainTcUserRow.tupled((<<[Int], <<?[String], <<?[String], <<?[String], <<?[String]))
-  }
-  implicit def GetResultPayTdAccountRow(implicit e0: GR[Int], e1: GR[Option[Double]]): GR[PayTdAccountRow] = GR{
-    prs => import prs._
-    PayTdAccountRow.tupled((<<[Int], <<?[Double], <<?[Double], <<[Int]))
-  }
-  implicit def GetResultPayTdiAccountItemRow(implicit e0: GR[Int], e1: GR[Option[String]], e2: GR[Option[Int]], e3: GR[Option[java.sql.Timestamp]]): GR[PayTdiAccountItemRow] = GR{
-    prs => import prs._
-    PayTdiAccountItemRow.tupled((<<[Int], <<?[String], <<?[Int], <<?[java.sql.Timestamp], <<[Int]))
-  }
+    */
 }

@@ -1,4 +1,4 @@
-package slickperf
+package slickperf.old
 
 import scala.slick.jdbc.{ StaticQuery => Q }
 import Q.interpolation
