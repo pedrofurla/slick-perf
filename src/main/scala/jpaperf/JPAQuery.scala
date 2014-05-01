@@ -3,9 +3,9 @@ package jpaperf
 import javax.persistence.EntityManager
 import exec.TestHelper._
 import exec._
-import support.Jpa
+import support.JpaConnection
 
-class JpaQuery(jpa:Jpa) extends DbRun {
+class JpaQuery(jpa:JpaConnection) extends DbRun {
 
   import jpa._
   import EntitiesOld._

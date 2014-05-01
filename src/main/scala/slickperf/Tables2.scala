@@ -1,6 +1,6 @@
 package slickperf
 
-import support.{TablesDefinition, SlickConnection, SlickProfile}
+import support.{TablesDefinition, SlickSupport, SlickProfile}
 
 //import scala.slick.model.ForeignKeyAction
 //import scala.slick.lifted
@@ -10,7 +10,7 @@ import support.{TablesDefinition, SlickConnection, SlickProfile}
 /** Stand-alone Slick data model for immediate use */
 
 /** Slick data model trait for extension, choice of backend or usage in the cake pattern. (Make sure to initialize this late.) */
-trait Tables2 extends TablesDefinition { self: SlickConnection with SlickProfile =>
+trait Tables2 extends TablesDefinition { self: SlickSupport with SlickProfile =>
 
   import profile.simple._
 

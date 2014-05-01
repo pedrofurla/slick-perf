@@ -2,11 +2,11 @@ package slickperf
 
 import exec.TestHelper._
 import exec._
-import support.SlickMySql2
+import support.SlickInstances._
 import SlickMySql2._
 import SlickMySql2.simple._
 
-object SlickInsertCompany extends DbRun {
+object SlickInsertCompanyEmployee extends DbRun {
 
   val title = "Slick Inserting companies and employees" // + "  with one connection"
 
@@ -37,7 +37,5 @@ object SlickInsertCompany extends DbRun {
     val tmp = res.foldMap1(identity)
     tmp.copy(value = title)
   }
-
-
 
 }

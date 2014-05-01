@@ -2,9 +2,7 @@ package slickperf
 
 import exec.TestHelper._
 import exec._
-import support.SlickMySql
-
-//import exec.Reports._
+import support.SlickInstances._
 import SlickMySql._
 import SlickMySql.simple._
 import exec.Chronometer.{Chronon, ElapsedTimeOf}

@@ -2,7 +2,8 @@ package support
 
 import scala.slick.driver.JdbcProfile
 
-case class ConnectionTemplate(url:String, username:String, password:String, driver:String)
+case class JdbcConnectionTemplate(url:String, username:String, password:String, driver:String)
+// ^^ TODO misses connection properties
 
 trait SlickProfile {
   val profile: JdbcProfile
@@ -13,22 +14,17 @@ trait SlickProfile {
   }
 }
 
-trait SlickConnection {
-  this: SlickProfile =>
+trait TablesDefinition extends SlickProfile {
+  val ddl: profile.DDL
+}
 
-  val dbConnection: ConnectionTemplate
-  
-  import dbConnection._
-  
-  import simple._
-  final val database: Database =  Database.forURL( url, username, password,null, driver)
+trait SlickSupport { this: SlickProfile with TablesDefinition =>
 
-  import scala.slick.model.codegen.{ SourceCodeGenerator => SCG }
+  import this.simple._
 
-  /** Generates the Slick model based on the database schema */
-  def genCode = {
-    SCG.main(Array(profile.getClass.getName, driver, url, ".", "xxx",username, password))
-  }
+  val jdbc: JdbcConnectionTemplate
+
+  final val database: Database =  Database.forURL( jdbc.url, jdbc.username, jdbc.password,null, jdbc.driver)
 
   type SlickAction[A] = Session => A
 
@@ -53,9 +49,9 @@ trait SlickConnection {
   */
 
   def performInTransactionN(n:Int)(action:SlickAction[Unit]): ElapsedTimeOf[Int,Chronon] =
-     inTransaction {
-       chronograph { const(n) compose { s => repeatN(n)(action(s)) } }
-     }
+    inTransaction {
+     chronograph { const(n) compose { s => repeatN(n)(action(s)) } }
+    }
 
   def performWithTransaction[A,B](n:B)(action:SlickAction[A]): ElapsedTimeOf[A,Chronon] =
     withTransaction {
@@ -68,17 +64,8 @@ trait SlickConnection {
        chronograph[B,A] { n => action(s) }(n)
      }
 
-}
 
-trait TablesDefinition extends SlickProfile {
-  val ddl: profile.DDL
-}
-
-trait CommonConnection extends SlickProfile with SlickConnection {
-  this: TablesDefinition =>
-
-  import simple._
-
+  // **** Schema management
   def createSchema = database withSession { s => ddl.create(s) }
   def destroySchema = database withSession { s => ddl.drop(s) }
   import scalaz._
@@ -87,47 +74,22 @@ trait CommonConnection extends SlickProfile with SlickConnection {
     createSchema
     val res = allCatch either f
     destroySchema
-    res.fold(_.printStackTrace(), _ => ())
+    res.fold(_.printStackTrace(), _ => ()) // TODO - this is a *HACK*
     \/.fromEither(res)
   }
+
+  import scala.slick.model.codegen.{ SourceCodeGenerator => SCG }
+
+  /** Generates the Slick model based on the database schema */
+  def genCode = {
+    SCG.main(Array(profile.getClass.getName, jdbc.driver, jdbc.url, ".", "xxx",jdbc.username, jdbc.password))
+  }
+  // ^^ TODO thinking again, it doesn't make much sense the code generator be in class that requires the existence of
+  // TableDefinitions, isn't it?
 }
 
-object SlickConnection {
+trait StdSlickSupport extends SlickSupport with SlickProfile with TablesDefinition
 
-  val mySqlConnection = ConnectionTemplate (
-     url = "jdbc:mysql://localhost:3306/slickperf",
-     username = "root",
-     password = "",
-     driver = "com.mysql.jdbc.Driver"
-  )
 
-  val postgresConnection = ConnectionTemplate (
-     url = "jdbc:postgresql://127.0.0.1:5432/slickperf",
-     username = "root",
-     password = "",
-     driver = "org.postgresql.Driver"
-  )
 
-  val mySqlConnection2 = ConnectionTemplate (
-     url = "jdbc:mysql://localhost:3306/jpa2",
-     username = "root",
-     password = "",
-     driver = "com.mysql.jdbc.Driver"
-  )
-}
 
-import SlickConnection._
-object SlickMySql extends {
-  val dbConnection = mySqlConnection
-  val profile = scala.slick.driver.MySQLDriver
-} with CommonConnection with slickperf.Tables
-
-object SlickPostgres extends {
-  val dbConnection = postgresConnection  
-  val profile = scala.slick.driver.PostgresDriver
-} with CommonConnection  with slickperf.Tables
-
-object SlickMySql2 extends {
-  val dbConnection = mySqlConnection2
-  val profile = scala.slick.driver.MySQLDriver
-} with  CommonConnection with slickperf.Tables2

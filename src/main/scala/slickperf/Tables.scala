@@ -1,12 +1,12 @@
 package slickperf
 
-import support.{TablesDefinition, SlickConnection, SlickProfile}
+import support.{TablesDefinition, SlickSupport, SlickProfile}
 
 // AUTO-GENERATED Slick data model
 /** Stand-alone Slick data model for immediate use */
 
 /** Slick data model trait for extension, choice of backend or usage in the cake pattern. (Make sure to initialize this late.) */
-trait Tables extends TablesDefinition { self: SlickConnection with SlickProfile =>
+trait Tables extends TablesDefinition { self: SlickSupport with SlickProfile =>
 
   import profile.simple._
   import scala.slick.model.ForeignKeyAction

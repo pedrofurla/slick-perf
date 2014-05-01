@@ -3,14 +3,15 @@ package jpaperf
 import javax.persistence.EntityManager
 import exec.TestHelper._
 import exec._
-import support.Jpa
+import support.JpaConnection
 
-class JpaInsert2(jpa:Jpa) extends DbRun {
+class JpaInsertCompanyEmployee(jpa:JpaConnection) extends DbRun {
   import jpa._
 
-  val title = s"JPA ${jpa.persistenceUnit} Inserting users and one account per user" // + " with one connection"
+  val title = s"JPA ${jpa.persistenceUnit} Inserting companies and employees" // + " with one connection"
 
   import jpa2._
+  import Entities._
 
   private final def action(em:EntityManager):Unit = {
     val c = newCompany

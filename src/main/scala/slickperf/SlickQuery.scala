@@ -2,7 +2,7 @@ package slickperf
 
 import exec.TestHelper._
 import exec._
-import support.SlickMySql
+import support.SlickInstances._
 import SlickMySql._
 import SlickMySql.simple._
 

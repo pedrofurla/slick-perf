@@ -11,17 +11,18 @@ object Comparisons {
   import scalaz._
   import Scalaz._
   import Chronometer._
+  import support.SlickInstances._
 
-  lazy val jpaE = Jpa.EclipseLinkJpa
-  lazy val jpaH = Jpa.HibernateJpa
-  lazy val jpaH2 = Jpa.HibernateJpa2
+  lazy val jpaE = JpaInstances.EclipseLinkJpa
+  lazy val jpaH = JpaInstances.HibernateJpa
+  lazy val jpaH2 = JpaInstances.HibernateJpa2
 
   /** A report is a "title" + a Nel of ElapsedTimes */
   type Report = ElapsedTimeOf[String, NEL[Chronon]]
 
   type RunWrapper = (NEL[Int],List[DbRun]) => \/[Throwable, List[Report]]
 
-  final def jpaRunWrapper(jpa: Jpa): RunWrapper = (reps:NEL[Int], runs:List[DbRun]) =>
+  final def jpaRunWrapper(jpa: JpaConnection): RunWrapper = (reps:NEL[Int], runs:List[DbRun]) =>
     SlickMySql inSchema {
       val r = runs map { _.run(reps) }
       println(s"Closing emFactory of ${jpa.persistenceUnit}")
@@ -29,7 +30,7 @@ object Comparisons {
       r
     } leftMap {x => x.printStackTrace(); jpa.emFactory.close; x} // TODO HORRIBLE HACK. FIX ME!
 
-  final def jpaRunWrapper2(jpa: Jpa): RunWrapper = (reps:NEL[Int], runs:List[DbRun]) =>
+  final def jpaRunWrapper2(jpa: JpaConnection): RunWrapper = (reps:NEL[Int], runs:List[DbRun]) =>
     SlickMySql2 inSchema {
       val r = runs map { _.run(reps) }
       println(s"Closing emFactory of ${jpa.persistenceUnit}")
@@ -38,7 +39,7 @@ object Comparisons {
     } leftMap {x => x.printStackTrace(); jpa.emFactory.close; x} // TODO HORRIBLE HACK. FIX ME!
 
 
-  final def slickRunWrapper(slick:CommonConnection with TablesDefinition): RunWrapper = (reps:NEL[Int], runs: List[DbRun]) =>
+  final def slickRunWrapper(slick:SlickSupport with TablesDefinition): RunWrapper = (reps:NEL[Int], runs: List[DbRun]) =>
     slick inSchema { runs map { _.run(reps) } } leftMap {x => x.printStackTrace(); x}          // TODO HORRIBLE HACK. FIX ME!
 
   val totalTimeColors = List("4070A0",/*"89A54E",*/"823333")
@@ -107,7 +108,7 @@ object Comparisons {
   class Slick2VsHibernate(val repetitions:NEL[Int]) {
     val inserts = Runs(
       "Insertion: Slick2 x Hibernate",
-      Sized(SlickInsertCompany,  new JpaInsert2(jpaH2))
+      Sized(SlickInsertCompanyEmployee,  new JpaInsertCompanyEmployee(jpaH2))
     )
 
     /*val queries = Runs(

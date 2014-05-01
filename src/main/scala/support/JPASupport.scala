@@ -2,25 +2,7 @@ package support
 
 import exec.TestHelper
 
-/**
- * Created by pedrofurla on 31/03/14.
- */
-object Jpa {
-  object EclipseLinkJpa extends {
-    val persistenceUnit="mysql-eclipselink"
-  } with Jpa
-
-  object HibernateJpa extends {
-    val persistenceUnit="mysql-hibernate"
-  } with Jpa
-
-
-  object HibernateJpa2 extends {
-    val persistenceUnit="jpa2-mysql-hibernate"
-  } with Jpa
-
-}
-trait Jpa {
+trait JpaConnection {
 
   import javax.persistence.{Persistence, EntityManager, EntityManagerFactory}
 

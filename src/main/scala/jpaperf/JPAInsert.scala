@@ -4,9 +4,9 @@ import javax.persistence.EntityManager
 import exec.TestHelper._
 import exec.DbRun
 import exec._
-import support.Jpa
+import support.JpaConnection
 
-class JpaInsert(jpa:Jpa) extends DbRun {
+class JpaInsert(jpa:JpaConnection) extends DbRun {
   import jpa._
   import EntitiesOld._
 

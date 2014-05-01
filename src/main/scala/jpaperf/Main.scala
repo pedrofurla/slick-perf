@@ -1,6 +1,6 @@
 package jpaperf
 
-import support.SlickMySql
+import support.SlickInstances.SlickMySql
 
 //import exec.Reports.Report
 
