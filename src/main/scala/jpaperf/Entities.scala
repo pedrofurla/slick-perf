@@ -36,7 +36,7 @@ object Entities {
   }
 
 
-  @Entity
+  @Entity(name = "Client")
   @Table(name = "client")
   class Client {
     @Id
@@ -57,18 +57,21 @@ object Entities {
 
     import java.util.Set
     import java.util.Collections
+    import java.util.List
 
-    @ManyToMany(mappedBy = "clientCollection")
-    var companyCollection:Set[Company] = Collections.emptySet();
+    @ManyToMany(mappedBy = "clients")
+    var companyCollection:List[Company] = Collections.emptyList() // NOTE: Set makes a lot more sense here, but list is more convenient
 
     def toTuple = (id,name,address,companyCollection)
+
+    override def toString = this.getClass.getSimpleName+":"+toTuple
 
     override def hashCode() = toTuple.hashCode()
 
     override def equals(obj: scala.Any) = toTuple.equals(obj.asInstanceOf[Client].toTuple)
   }
 
-  @Entity
+  @Entity(name = "Company")
   @Table(name = "company")
   class Company {
 
@@ -92,6 +95,7 @@ object Entities {
 
     import java.util.Set
     import java.util.Collections
+    import java.util.List
 
     @JoinTable(
       name = "company_clients",
@@ -100,13 +104,16 @@ object Entities {
     )
     @ManyToMany
     @BeanProperty
-    var clientCollection: Set[Client] = Collections.emptySet()
+    var clients: List[Client] = Collections.emptyList()  // NOTE: Set makes a lot more sense here, but list is more convenient
 
     @OneToMany(cascade = Array(CascadeType.ALL), mappedBy = "company")
     @BeanProperty
-    var employeeCollection: Set[Employee] = Collections.emptySet()
+    var employees: List[Employee] = Collections.emptyList() // NOTE: Set makes a lot more sense here, but list is more convenient
 
-    def toTuple = (id,name,address,clientCollection,employeeCollection)
+    def toTuple = (id,name,address,clients, "employees: "+employees.size())
+    // NOTE: see note at Company.toTuple, same here with employees
+
+    override def toString = this.getClass.getSimpleName+":"+toTuple
 
     override def hashCode() = toTuple.hashCode()
 
@@ -115,13 +122,13 @@ object Entities {
   }
 
 
-  @Entity
+  @Entity(name = "Employee")
   @Table(name = "employee")
-  @NamedQueries(Array(
+ /* @NamedQueries(Array(
     new NamedQuery(name = "Employee.findAll", query = "SELECT e FROM Employee e"),
     new NamedQuery(name = "Employee.findById", query = "SELECT e FROM Employee e WHERE e.id = :id"),
     new NamedQuery(name = "Employee.findByName", query = "SELECT e FROM Employee e WHERE e.name = :name"),
-    new NamedQuery(name = "Employee.findByPhone", query = "SELECT e FROM Employee e WHERE e.phone = :phone")))
+    new NamedQuery(name = "Employee.findByPhone", query = "SELECT e FROM Employee e WHERE e.phone = :phone")))*/
    class Employee  {
 
     @Id
@@ -146,7 +153,10 @@ object Entities {
     @BeanProperty
     var company: Company = _;
 
-    def toTuple = (id,name,phone,company)
+    def toTuple = (id,name,phone,"Company: "+(company.id,company.name))
+    // ^ NOTE: can't use just company, otherwise there is a infinity cycle, since company points to the same employee
+
+    override def toString = this.getClass.getSimpleName+":"+toTuple
 
     override def hashCode() = toTuple.hashCode()
 

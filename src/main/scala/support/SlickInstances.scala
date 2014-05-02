@@ -40,5 +40,5 @@ object SlickInstances {
   object SlickMySql extends {
     val jdbc = mySqlConnection2
     val profile = scala.slick.driver.MySQLDriver
-  } with StdSlickSupport with slickperf.Tables
+  } with SlickSupport with slickperf.Tables
 }

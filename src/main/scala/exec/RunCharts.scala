@@ -44,17 +44,22 @@ object RunCharts {
 
   import TestHelper.writeFile
 
-  def run():Unit = {
+  val repetitions = Nel(
+  //1
+     1,
+     10,    20,    30,    40,    50     // 6
+    ,100,   200,   300,   400,   500    // 11
+    ,1000,  2000,  3000,  4000,  5000   // 16
+    //,6000,  7000,  8000,  9000, 10000
+    ,10000, 20000, 30000, 40000, 50000  // 21
+  )
+
+  def runOld():Unit = {
     import Comparisons._
     import scalaz._
-    val reps = Nel(
-      1, 10, 20, 30, 40, 50
-      ,100, 200, 300, 400, 500
-      ,1000,2000,3000,4000,5000
-      ,6000,7000,8000,9000,10000
-      //,20000, 30000, 40000, 50000
-    )
-    val comparison =new SlickVsHibernate(reps).comparisons
+    import Scalaz._
+    val reps = repetitions.list.take(17).toNel.get
+    val comparison =new SlickVsHibernateOld(reps).comparisons
     val result = comparison.run
 
     val contents = templates.html.plots3(comparison.amendedRepetitions, result).body
@@ -63,15 +68,12 @@ object RunCharts {
   }
 
 
-  def runTest():Unit = {
+  def runTestOld():Unit = {
     import Comparisons._
     import scalaz._
-    val reps = Nel(
-      1, 10, 20, 30, 40, 50
-      ,100, 200, 300, 400, 500
-      ,1000,2000,3000,4000,5000
-    )
-    val comparison =new SlickVsHibernate(reps).comparisons
+    import Scalaz._
+    val reps = repetitions.list.take(16).toNel.get
+    val comparison = new SlickVsHibernateOld(reps).comparisons
     val result = comparison.run
 
     val contents = templates.html.plots3(comparison.amendedRepetitions, result).body
@@ -79,15 +81,12 @@ object RunCharts {
     writeFile(contents, "html/output-test.html")
   }
 
-  def runTest2():Unit = {
+  def runTest():Unit = {
     import Comparisons._
     import scalaz._
-    val reps = Nel(
-      1, 10, 20, 30, 40, 50
-      ,100, 200, 300, 400, 500
-      ,1000,2000,3000,4000,5000
-    )
-    val comparison =new Slick2VsHibernate(reps).comparisons
+    import Scalaz._
+    val reps = repetitions.list.take(18).toNel.get
+    val comparison = new SlickVsHibernate(reps).comparisons
     val result = comparison.run
 
     val contents = templates.html.plots3(comparison.amendedRepetitions, result).body
@@ -105,8 +104,8 @@ object RunCharts {
     println(info)
     println(s"arguments: $arguments")
 
+    //runTestOld()
     runTest()
-    //runTest2()
 
   }
 }

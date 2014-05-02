@@ -18,7 +18,7 @@ trait TablesDefinition extends SlickProfile {
   val ddl: profile.DDL
 }
 
-trait SlickSupport { this: SlickProfile with TablesDefinition =>
+trait SlickSupport extends SlickProfile { this: TablesDefinition =>
 
   import this.simple._
 
@@ -88,7 +88,7 @@ trait SlickSupport { this: SlickProfile with TablesDefinition =>
   // TableDefinitions, isn't it?
 }
 
-trait StdSlickSupport extends SlickSupport with SlickProfile with TablesDefinition
+trait StdSlickSupport extends SlickSupport with SlickProfile { this: TablesDefinition => }
 
 
 

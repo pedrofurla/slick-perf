@@ -64,9 +64,10 @@
 
     <persistence-unit name="jpa2-mysql-hibernate">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <class>jpa2.Client</class>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <!--<class>jpa2.Client</class>
         <class>jpa2.Company</class>
-        <class>jpa2.Employee</class>
+        <class>jpa2.Employee</class>-->
 
         <properties>
 

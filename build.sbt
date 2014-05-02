@@ -90,7 +90,8 @@ initialCommands in console :=
     |import exec.Chronometer._
     |//import exec.Comparisons._
     |import slickperf._
-    |import SlickMySql._
+    |import support.SlickInstances.SlickMySql
+    |import support.SlickInstances.SlickMySql._
     |import SlickMySql.simple._
     |//import exec.CSV._
     |
@@ -100,8 +101,10 @@ initialCommands in console :=
     |import scalaz._
     |import Scalaz._
     |
-    |val m2 = SlickMySql2
+    |val slick = SlickMySql
   """.stripMargin
+
+
 
 initialCommands in Test :=
   """
@@ -123,8 +126,104 @@ twirlImports ++=
     "Scalaz._")
 
 
-//scalacOptions in Compile += "-explaintypes"
+//val hconsole = taskKey[Unit]("")
 
+//hconsole <<= Defaults.consoleTask(fullClasspath in Compile, console in Compile) // (console in compile)
+
+
+
+//(console in hconfig) <<= (console in Compile) map { x => initialCommands( _ => "bunda" ) }
+//
+//  initialCommands in hconfig :=
+//  """
+//  |import exec._
+//  |import exec.TestHelper._
+//  |import support.JpaInstances.HibernateJpa
+//  |import scalaz._
+//  |import Scalaz._
+//  |
+//  |import jpaperf._
+//  |import jpaperf.entities._
+//  |
+//  |val slick = support.SlickInstances.SlickMySql
+//  |slick.createSchema
+//  |
+//  |val jpa = HibernateJpa
+//  |val ic = new JapInsertCompany(jpa)
+//  |ic.run(Nel(10))
+//  """.stripMargin
+//
+//  cleanupCommands in hconfig  :=
+//  """
+//  |slick.destroySchema
+//  """.stripMargin
+
+
+val hconfig = config("hconfig").extend(Compile)
+
+// TODO Now that I am using the right config '.configTasks' would the below commented version work?
+val slickperf = project.in(file(".")).
+  configs(hconfig).
+  settings(inConfig(hconfig)(Defaults.configTasks) : _*)
+  .settings(
+      fork.in(hconfig,console) := true,
+      initialCommands in hconfig :=
+        """
+        |import exec._
+        |import exec.TestHelper._
+        |import support.JpaInstances.HibernateJpa
+        |import scalaz._
+        |import Scalaz._
+        |
+        |import collection.JavaConversions._
+        |
+        |import jpaperf._
+        |import jpaperf.Entities._
+        |
+        |val slick = support.SlickInstances.SlickMySql
+        |slick.createSchema
+        |
+        |val jpa = HibernateJpa
+        |val em = jpa.defaultEm
+        |val ic = new JpaInsertCompanyEmployee(jpa)
+        |ic.run(Nel(3))
+        """.stripMargin,
+      cleanupCommands in hconfig :=
+        """
+        |jpa.emFactory.close()
+        |slick.destroySchema
+        """.stripMargin
+  )
+
+//val confed = inConfig(hconfig)(Defaults.defaultSettings ++ Defaults.configSettings ++ Seq(
+//  initialCommands :=
+//  """
+//  |import exec._
+//  |import exec.TestHelper._
+//  |import support.JpaInstances.HibernateJpa
+//  |import scalaz._
+//  |import Scalaz._
+//  |
+//  |import jpaperf._
+//  |import jpaperf.entities._
+//  |
+//  |val slick = support.SlickInstances.SlickMySql
+//  |slick.createSchema
+//  |
+//  |val jpa = HibernateJpa
+//  |val ic = new JapInsertCompany(jpa)
+//  |ic.run(Nel(10))
+//  """.stripMargin,
+//  cleanupCommands :=
+//  """
+//  |slick.destroySchema
+//  """.stripMargin
+//))
+
+ //thisProject.value.settings
+
+
+//scalacOptions in Compile += "-explaintypes"
 //scalacOptions in Compile += "-Xlog-implicits"
 
 //scalacOptions in test += "-explaintypes"

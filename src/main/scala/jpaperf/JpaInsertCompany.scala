@@ -5,21 +5,16 @@ import exec.TestHelper._
 import exec._
 import support.JpaConnection
 
-class JpaInsertCompanyEmployee(jpa:JpaConnection) extends DbRun {
+class JpaInsertCompany(jpa:JpaConnection) extends DbRun {
   import jpa._
 
-  val title = s"JPA ${jpa.persistenceUnit} Inserting companies and employees" // + " with one connection"
+  val title = s"JPA ${jpa.persistenceUnit} Inserting companies" // + " with one connection"
 
   import Entities._
 
   private final def action(em:EntityManager):Unit = {
     val c = newCompany
     em persist c
-    val reminder = (c.getId % 5) + 1
-    for(i <- 1 to reminder) {
-      val e = newEmployee(c) // TODO is there some batch we can do here?
-      em persist e
-    }
   }
 
   private final def newCompany:Company = {
@@ -27,15 +22,6 @@ class JpaInsertCompanyEmployee(jpa:JpaConnection) extends DbRun {
     c.setName("zlaja")
     c.setAddress("zlaja")
     c
-  }
-
-  private final def newEmployee(company:Company) = {
-    val e = new Employee
-    e.setName("name")
-    e.setPhone("phone#")
-    e.setCompany(company)
-    //user.getPayAccountList.add(e)
-    e
   }
 
   import exec.Chronometer._
